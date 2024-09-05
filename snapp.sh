@@ -104,12 +104,12 @@ echo -e "\nRunning RDP classifier...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
 if [[ -z $RDP_CLASSIFIER ]]
 then
-    java -Xmx4g -jar ${RDPHOME}/classifier.jar \
+    ${RDPHOME}/classifier \
         -f fixrank \
         -o asv_PE.cls \
         asv_PE.fasta
 else
-    java -Xmx4g -jar ${RDPHOME}/classifier.jar \
+    ${RDPHOME}/classifier \
         -t $RDP_CLASSIFIER \
         -o asv_PE.cls \
         asv_PE.fasta

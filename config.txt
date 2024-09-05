@@ -1,17 +1,17 @@
 #!/usr/sh
 
 ## tool paths
-CUTADAPT=path-to/cutadapt
-VSEARCH=path-to/vsearch
-export RDPHOME=path-to/RDPTools #the directory where classifier.jar lives
-export MAKEBLASTDB=path-to/makeblastdb
-export BLASTN=path-to/blastn
+CUTADAPT=/home/jose/anaconda3/envs/16S-SNAPP/bin/cutadapt
+VSEARCH=/home/jose/anaconda3/envs/16S-SNAPP/bin/vsearch
+export RDPHOME=/home/jose/anaconda3/envs/16S-SNAPP/bin/
+export MAKEBLASTDB=/home/jose/anaconda3/envs/16S-SNAPP/bin/makeblastdb
+export BLASTN=/home/jose/anaconda3/envs/16S-SNAPP/bin/makeblastdb
 
 ## database paths
-export RDP_FULL_BLAST=/path-to/DB/rdp11_5
-export RDP_FULL_SEQ=/path-to/DB/rdp11_5.fasta
+export RDP_FULL_BLAST=/home/jose/Data/Metagenomics/16S-SNAPP_test/16S_DB
+export RDP_FULL_SEQ=/home/jose/Data/Metagenomics/16S-SNAPP_test/16S_DB/rdp11_5.fasta
 #export RDP_CLASSIFIER=/path-to/rRNAClassifier.properties #path to custom trained RDP Classifier
 
 ## primers and other settings
-PRIMERS=path-to/Swift_16S_SNAP_primers.fasta #primer file formatted paired-end primer trimming
+PRIMERS=/home/jose/Data/Metagenomics/16S-SNAPP_test/16S_DB/Swift_16S_SNAP_primers_v2.fasta #primer file formatted paired-end primer trimming
 export READLEN=130 #expected single read length after primer is trimmed
