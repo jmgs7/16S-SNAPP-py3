@@ -1,34 +1,36 @@
 #!/usr/bin/env python
-#return only doubleton and multipton clusters
-#Implement centroid clustering on sorted sam pairwise alignment
-#query ids are used to generate centroids, which 'recruit' hits within the 
-#distance radius cutoff: defaul 0.03
+# return only doubleton and multipton clusters
+# Implement centroid clustering on sorted sam pairwise alignment
+# query ids are used to generate centroids, which 'recruit' hits within the
+# distance radius cutoff: defaul 0.03
 
 import sys
 from cigar import Cigar
 
+
 def get_pct_id(cigar_tuple):
-    m = 0 #matches
+    m = 0  # matches
     total = 0
     for seg in cigar_tuple:
         count, Type = seg
         total += count
-        if Type == '=':
+        if Type == "=":
             m += int(count)
     try:
-        identity = m/total
+        identity = m / total
     except ZeroDivisionError:
         identity = 0
     return identity
 
-def get_dist_dict(f): #generate clusters by centroid approach
-    clusters = {} #dict of clusters
-    covered = set([]) #previously clustered hit IDs
-    centroids = set([]) #set of centroid IDs
-    order = [] #track the cluster order
-    lines = open(f, 'r').readlines()
+
+def get_dist_dict(f):  # generate clusters by centroid approach
+    clusters = {}  # dict of clusters
+    covered = set([])  # previously clustered hit IDs
+    centroids = set([])  # set of centroid IDs
+    order = []  # track the cluster order
+    lines = open(f, "r").readlines()
     for line in lines:
-        if line[0] == '@':
+        if line[0] == "@":
             continue
         cols = line.strip().split()
         id1 = cols[0].strip()
@@ -56,22 +58,23 @@ def get_dist_dict(f): #generate clusters by centroid approach
             else:
                 clusters[qid].append(sid)
         covered.add(sid)
-    print ('centroid', len(centroids))
-    print (len(covered.union(centroids)), 'in clusters')
+    print("centroid", len(centroids))
+    print(len(covered.union(centroids)), "in clusters")
     return clusters, order
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print ('parse_minimap2.py aligned.sam outname cutoff[0-1]')
+        print("parse_minimap2.py aligned.sam outname cutoff[0-1]")
         sys.exit()
-    f = sys.argv[1]#alignment in sam format
+    f = sys.argv[1]  # alignment in sam format
     outname = sys.argv[2]
-    cutoff = float(sys.argv[3]) #0-1 distance cutoff
-    print (f)
+    cutoff = float(sys.argv[3])  # 0-1 distance cutoff
+    print(f)
     count = 0
-    exit_set = [] #checking
-    out = open(outname, 'w')
+    exit_set = []  # checking
+    out = open(outname, "w")
     clusters, order = get_dist_dict(f)
     for i, cID in enumerate(order):
-        out.write(str(i) + '\t' + ','.join(clusters[cID]) + '\n')
+        out.write(str(i) + "\t" + ",".join(clusters[cID]) + "\n")
     out.close()

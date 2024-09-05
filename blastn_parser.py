@@ -2,8 +2,9 @@
 ## Swift Biosciences 16S snapp workflow
 ## Author Benli Chai & Sukhinder Sandhu 20200502
 
-#dereplicate reference hits by their matching read id set
+# dereplicate reference hits by their matching read id set
 ## Ported to Python 3 on 20210106
+
 
 def derep_refset(refset):
     uniq_read_sets = []
@@ -15,10 +16,10 @@ def derep_refset(refset):
             uniq_read_sets.append(q_set)
     return dereped
 
+
 def converge_ref(refset):
-    #sort refset in descending order by the number of covered bases and then by read count
-    refset.sort(key=lambda x: (len(x.positions), len(x.getReadIDs())), \
-                reverse=True)
+    # sort refset in descending order by the number of covered bases and then by read count
+    refset.sort(key=lambda x: (len(x.positions), len(x.getReadIDs())), reverse=True)
     all_read_ids = set([])
     ref2read_dict = {}
     for ref in refset:
@@ -39,6 +40,7 @@ def converge_ref(refset):
             selected.append(ref)
     return selected
 
+
 # recursively remove references to which there are no uniquely mapped reads
 def remove_nonuniq_refs(ref2read_dict):
     read2ref_dict = {}
@@ -52,36 +54,39 @@ def remove_nonuniq_refs(ref2read_dict):
         status = []
         for readID in readIDs:
             status.append(len(read2ref_dict[readID]))
-        if status.count(1) == 0: #no uniquely mapped reads for this reference
+        if status.count(1) == 0:  # no uniquely mapped reads for this reference
             del ref2read_dict[ref_id]
             return remove_nonuniq_refs(ref2read_dict)
     return ref2read_dict
+
 
 # load filtered and dereplicated blastn results into a dictionary
 def get_blastn_hits(blastn, uc_filename):
     read2rep = get_id_dict(uc_filename)
     rep2asv = invert_dict(read2rep)
-    hit_info = {} #to hold blast info, i.e. coordinates
-    f = open(blastn, 'r')
-    rc_set = set([]) #PEs in reverse-complement orientation with respect to the reference sequences (presumed to be in the positive orientation)
+    hit_info = {}  # to hold blast info, i.e. coordinates
+    f = open(blastn, "r")
+    rc_set = set(
+        []
+    )  # PEs in reverse-complement orientation with respect to the reference sequences (presumed to be in the positive orientation)
     while 1:
         try:
             line = next(f)
-            cols = line.strip().split('\t')
+            cols = line.strip().split("\t")
             qid = cols[0]
-            asv_ids = rep2asv[qid] #the actual asv_ids represented by this rep ID
+            asv_ids = rep2asv[qid]  # the actual asv_ids represented by this rep ID
             sid = cols[1].strip()
             start = int(cols[8])
             end = int(cols[9])
-            asv_ids = rep2asv[qid] #the actual asv_ids represented by this rep ID
+            asv_ids = rep2asv[qid]  # the actual asv_ids represented by this rep ID
             if not sid in hit_info:
                 hit_info[sid] = {}
             for asv_id in asv_ids:
-                asv_id, r_end = asv_id.split('_R')#R1:0; R2:1
+                asv_id, r_end = asv_id.split("_R")  # R1:0; R2:1
                 r_end = int(r_end) - 1
                 if not asv_id in hit_info[sid]:
                     hit_info[sid][asv_id] = [[], []]
-                if start > end: # reverse-complement orientation
+                if start > end:  # reverse-complement orientation
                     rc_set.add(asv_id)
                 info = [start, end]
                 info.sort()
@@ -89,24 +94,27 @@ def get_blastn_hits(blastn, uc_filename):
         except StopIteration:
             break
     return hit_info, rc_set
-#generate a map of unique asvid to asvid
+
+
+# generate a map of unique asvid to asvid
 def get_id_dict(uc_filename):
     id_dict = {}
-    f = open(uc_filename, 'r')
+    f = open(uc_filename, "r")
     while 1:
         try:
             line = next(f)
-            cols = line.strip().split('\t')
-            if not cols[0] == 'C':
-                cols = line.strip().split('\t')
+            cols = line.strip().split("\t")
+            if not cols[0] == "C":
+                cols = line.strip().split("\t")
                 self, rep = cols[8:10]
-                if rep == '*':
+                if rep == "*":
                     id_dict[self] = self
                 else:
                     id_dict[self] = rep
         except StopIteration:
             break
     return id_dict
+
 
 def remove_blastn_subsets(Hash):
     ref_ids = Hash.keys()
@@ -118,9 +126,10 @@ def remove_blastn_subsets(Hash):
             if set(Hash[ref_id1].keys()).issubset(set(Hash[ref_id2].keys())):
                 ref_IDs.remove(ref_id1)
                 break
-    return {ref_id:Hash[ref_id] for ref_id in ref_IDs}
+    return {ref_id: Hash[ref_id] for ref_id in ref_IDs}
 
-def invert_dict(id_dict):#switch keys and values
+
+def invert_dict(id_dict):  # switch keys and values
     id_dict_inv = {}
     for key, value in id_dict.items():
         if not value in id_dict_inv:
@@ -128,9 +137,11 @@ def invert_dict(id_dict):#switch keys and values
         id_dict_inv[value].append(key)
     return id_dict_inv
 
+
 # instantiate objects for template sequences
 def initiate_refset(hits_info_dict):
     from Refseq import Refseq
+
     refset = []
     asv_list = []
     for refid in hits_info_dict.keys():
