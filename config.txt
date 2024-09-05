@@ -2,7 +2,7 @@
 
 ## tool paths
 CUTADAPT=~/anaconda3/envs/16S-SNAPP/bin/cutadapt
-VSEARCH=~/home/jose/anaconda3/envs/16S-SNAPP/bin/vsearch
+VSEARCH=~/anaconda3/envs/16S-SNAPP/bin/vsearch
 export RDPHOME=~/anaconda3/envs/16S-SNAPP/bin/
 export MAKEBLASTDB=~/anaconda3/envs/16S-SNAPP/bin/makeblastdb
 export BLASTN=~/anaconda3/envs/16S-SNAPP/bin/blastn
