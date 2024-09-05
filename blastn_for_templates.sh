@@ -46,11 +46,11 @@ cat blastn_1.txt \
 template_count=$(< reflist.txt wc -l)
 
 cut -f2 blastn_1.txt |sort -u > exp_reflist.txt
-java -jar ${RDPHOME}/ReadSeq.jar \
+${RDPHOME}/ReadSeq \
     select-seqs exp_reflist.txt  \
     exp_refset.fasta fasta Y ${RDP_FULL_SEQ}
 
-java -jar ${RDPHOME}/ReadSeq.jar \
+${RDPHOME}/ReadSeq \
     select-seqs reflist.txt \
     refset.fasta fasta Y exp_refset.fasta
 echo "    Ends: $(date)">>$log
@@ -64,7 +64,7 @@ echo -e "\nFormatting SeqMatch DB ...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
 [  -d seqmatch ] && echo "Directory seqmatch does exist, please delete..." && exit
 mkdir seqmatch
-java -jar ${RDPHOME}/SequenceMatch.jar train exp_refset.fasta seqmatch/train
+${RDPHOME}/SequenceMatch train exp_refset.fasta seqmatch/train
 echo "    Ends: $(date)">>$log
 end=$(date +%s.%N)
 runtime=$(python -c "print(${end} - ${start})")
@@ -103,7 +103,7 @@ echo "    Dereplicate Second blast Runtime: $runtime sec" >> $log
 
 echo -e "\nRunning extracting dereplicated blastn_2...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
-java -jar ${RDPHOME}/ReadSeq.jar \
+${RDPHOME}/ReadSeq \
     select-seqs blastn_2_derep_IDs.txt \
     blastn_2_derep.fasta fasta Y refset.fasta
 echo "    Ends: $(date)">>$log

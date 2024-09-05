@@ -5,10 +5,10 @@ CUTADAPT=/home/jose/anaconda3/envs/16S-SNAPP/bin/cutadapt
 VSEARCH=/home/jose/anaconda3/envs/16S-SNAPP/bin/vsearch
 export RDPHOME=/home/jose/anaconda3/envs/16S-SNAPP/bin/
 export MAKEBLASTDB=/home/jose/anaconda3/envs/16S-SNAPP/bin/makeblastdb
-export BLASTN=/home/jose/anaconda3/envs/16S-SNAPP/bin/makeblastdb
+export BLASTN=/home/jose/anaconda3/envs/16S-SNAPP/bin/blastn
 
 ## database paths
-export RDP_FULL_BLAST=/home/jose/Data/Metagenomics/16S-SNAPP_test/16S_DB
+export RDP_FULL_BLAST=/home/jose/Data/Metagenomics/16S-SNAPP_test/16S_DB/rdp11_5
 export RDP_FULL_SEQ=/home/jose/Data/Metagenomics/16S-SNAPP_test/16S_DB/rdp11_5.fasta
 #export RDP_CLASSIFIER=/path-to/rRNAClassifier.properties #path to custom trained RDP Classifier
 
