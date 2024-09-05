@@ -89,7 +89,7 @@ printf '\n' >> $log
 echo -e "\nDADA2 processing stats:" >> $log
 #Prepare asv count tables and sequences in PEs, single formats
 ${SCRIPTS}/run_dada2.R trimmed/ . ${READLEN} >> $log #run dada2 with R
-cat "DADA2_summary.csv" | sed -e 's/"//g' >> $log
+# cat "DADA2_summary.csv" | sed -e 's/"//g' >> $log
 ${SCRIPTS}/get_asv_files.py asv_seqNcount.csv asv
 
 echo -e "\n    Unique ASV pairs from DADA2: $(bc <<< "$(grep -c ">" \

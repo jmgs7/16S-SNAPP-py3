@@ -62,7 +62,7 @@ def assign_read_counts(sampleID, readCounts, hits_info):
         df = DF.loc[
             :, (DF.loc[readID] > 0)
         ]  # dataframe slice containing all reference columns that have nonzero values with this read
-        df = df.loc[(df != 0).any(1), :]  # drop read rows that contain all zeros
+        df = df.loc[~(df == 0).all(axis=1)]  # drop read rows that contain all zeros
         df_assigned = DF_assigned.loc[
             df.index, df.columns
         ]  # make a same slice the dataframe to hold normalized values
