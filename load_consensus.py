@@ -40,7 +40,7 @@ def align_seqs(refseq, pe_seq_dict, tmp_dir):
 
     #Run alignment tool align each read to the template in glocal mode
     #collect alignment from stdout
-    aligned = os.popen('java -jar RDPHOME/AlignmentTools.jar pairwise-knn \
+    aligned = os.popen('RDPHOME/AlignmentTools pairwise-knn \
                -k 1 READS TEMPLATE'.replace('READS', read_filename).\
                replace('TEMPLATE', template_filename).replace('RDPHOME', RDPHOME)).readlines()
     return (aligned, read_count_list)

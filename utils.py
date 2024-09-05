@@ -26,9 +26,7 @@ def fetch_refseq(RDPHOME, id_file_name, outfile_name, reffile_name):
 
     subprocess.check_call(
         [
-            "java",
-            "-jar",
-            os.path.join(RDPHOME, "ReadSeq.jar"),
+            os.path.join(RDPHOME, "ReadSeq"),
             "select-seqs",
             id_file_name,
             outfile_name,
@@ -153,7 +151,7 @@ def seq_match(WD, QUERY):  # function to run seqmatch
     import os
 
     DB = os.path.join(WD, "seqmatch")
-    cmd = "java -jar ${RDPHOME}/SequenceMatch.jar \
+    cmd = "${RDPHOME}/SequenceMatch \
     seqmatch -k 1 -s 0.4 DB QUERY".replace(
         "DB", DB
     ).replace(

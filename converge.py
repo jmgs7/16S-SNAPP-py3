@@ -229,7 +229,7 @@ start_time = timeit.default_timer()
 WD = os.environ['WD'] #work directory
 RDPHOME = os.environ['RDPHOME']
 RESDIR = os.environ['RESDIR']
-readseqJar = os.path.join(RDPHOME, "ReadSeq.jar")
+readseqJar = os.path.join(RDPHOME, "ReadSeq")
 ref_db_path = os.path.join(WD, 'refset.fasta')
 
 #Three arguments#
