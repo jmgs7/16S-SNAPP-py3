@@ -3,6 +3,10 @@
 ## Author Benli Chai & Sukhinder Sandhu 20210106
 ## Ported to Python 3
 
+# This script is used to extract the ASV sequences from the OTU table
+# and convert it to fasta format.
+# The script will also replace the sequence strings with IDs, and outpus the OTU table with the ID as the asv number, and the sequences, both as merged pairs and separated files.
+
 import sys
 
 

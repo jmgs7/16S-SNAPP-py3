@@ -88,10 +88,12 @@ start=$(date +%s.%N)
 printf '\n' >> $log
 echo -e "\nDADA2 processing stats:" >> $log
 #Prepare asv count tables and sequences in PEs, single formats
-${SCRIPTS}/run_dada2.R trimmed/ . ${READLEN} >> $log #run dada2 with R
+# TODO: Add automatic detection of READLEN based on QC.
+${SCRIPTS}/01_run_dada2.R trimmed/ . ${READLEN} >> $log #run dada2 with R
 # cat "DADA2_summary.csv" | sed -e 's/"//g' >> $log
-${SCRIPTS}/get_asv_files.py asv_seqNcount.csv asv
+${SCRIPTS}/02_get_asv_files.py asv_seqNcount.csv asv
 
+# Count the unique paris of ASVs from get_asv_files.py output
 echo -e "\n    Unique ASV pairs from DADA2: $(bc <<< "$(grep -c ">" \
     asv_seq.fasta)/2")"  >>$log
 echo "    Ends: $(date)">>$log
@@ -107,7 +109,7 @@ then
     ${RDPHOME}/classifier \
         -f fixrank \
         -o asv_PE.cls \
-        asv_PE.fasta
+        asv_PE.fasta # It uses the merged pair-end reads.
 else
     ${RDPHOME}/classifier \
         -t $RDP_CLASSIFIER \
@@ -124,16 +126,16 @@ echo "    Read classfication Runtime: $runtime sec" >> $log
 echo -e "\nDereplicating ASVs...\n    Starts: $(date)" >>$log
 start=$(date +%s.%N)
 $VSEARCH --cluster_size asv_seq.fasta \
-         --strand both \
-         --iddef 1 \
-         --id 1.00 \
-         --uc asv.uc \
-         --centroid asv_uniq.fasta
+        --strand both \
+        --iddef 1 \
+        --id 1.00 \
+        --uc asv.uc \
+        --centroid asv_uniq.fasta
 end=$(date +%s.%N)
 runtime=$(python -c "print(${end} - ${start})")
 echo "    Dereplication Runtime: $runtime sec" >> $log
 
-${SCRIPTS}/blastn_for_templates.sh
+${SCRIPTS}/03_blastn_for_templates.sh
 
 ##Determine the candiate reference sequenes, associate reads, allocate read counts,
 ##and classify each consensus sequence representing each associated amplicon set.

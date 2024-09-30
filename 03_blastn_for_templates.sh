@@ -23,7 +23,7 @@ echo "    Making ASV blastDB Runtime: $runtime sec" >> $log
 echo -e "\nRunning first blast...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
 $BLASTN \
-    -num_threads 4 \
+    -num_threads $THREADS \
     -db ${RDP_FULL_BLAST} \
     -query asv_uniq.fasta \
     -out blastn_1.txt \
@@ -40,16 +40,19 @@ echo "    First Runtime: $runtime sec" >> $log
 echo -e "\nFiltering the first blast...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
 cat blastn_1.txt \
-    | awk -F '\t' '{if($3 >= 99 && ($4/$13) > 0.99) print $2}' \
+    # Filters by perc_identity and qcov_hsp_perc.
+    | awk -F '\t' '{if($3 >= 99 && ($4/$13) > 0.99) print $2}' \ 
     | sort -u \
-    > reflist.txt
+    > reflist.txt # Reflist contains the IDs from the FILTERED matched reference sequences.
 template_count=$(< reflist.txt wc -l)
 
-cut -f2 blastn_1.txt |sort -u > exp_reflist.txt
+# Filters the fastq of the refset to only include the filtered matchedreference sequences.
+cut -f2 blastn_1.txt | sort -u > exp_reflist.txt # exp_reflist contains the IDs from ALL the matched reference sequences.
 ${RDPHOME}/ReadSeq \
     select-seqs exp_reflist.txt  \
     exp_refset.fasta fasta Y ${RDP_FULL_SEQ}
 
+# Filters the fastq of the refset to only include the matched reference sequences (no filtering).
 ${RDPHOME}/ReadSeq \
     select-seqs reflist.txt \
     refset.fasta fasta Y exp_refset.fasta
@@ -59,12 +62,11 @@ runtime=$(python -c "print(${end} - ${start})")
 echo -e "\nExtracting ${template_count} preliminary candidate template sequences\n    Starts: $(date)">>$log
 echo "    Completed parsing first blast. Runtime: $runtime sec" >> $log
 
-# Prepare SeqMatch DB
-echo -e "\nFormatting SeqMatch DB ...\n    Starts: $(date)">>$log
+# Prepare SeqMatch DBecho -e "\nFormatting SeqMatch DB ...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
 [  -d seqmatch ] && echo "Directory seqmatch does exist, please delete..." && exit
 mkdir seqmatch
-${RDPHOME}/SequenceMatch train exp_refset.fasta seqmatch/train
+${RDPHOME}/SequenceMatch train exp_refset.fasta seqmatch/train # Trains with all the matched reference sequences.
 echo "    Ends: $(date)">>$log
 end=$(date +%s.%N)
 runtime=$(python -c "print(${end} - ${start})")

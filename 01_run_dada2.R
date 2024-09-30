@@ -26,6 +26,7 @@ filtRs <- file.path(path, "filtered", paste0(sample.names, "_R_filt.fastq.gz"))
 names(filtFs) <- sample.names
 names(filtRs) <- sample.names
 
+# TODO: Add automatic detection of READLEN based on QC.
 out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(READLEN, READLEN), maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE, compress=TRUE, multithread=TRUE)
 
 errF <- learnErrors(filtFs, multithread=TRUE)
