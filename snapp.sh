@@ -141,7 +141,7 @@ ${SCRIPTS}/03_blastn_for_templates.sh
 ##and classify each consensus sequence representing each associated amplicon set.
 echo -e "\nConverging candidate template sequences...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
-${SCRIPTS}/converge.py \
+${SCRIPTS}/04_converge.py \
         asv_count.csv \
         asv_PE.fasta \
         asv_PE.cls \
@@ -155,7 +155,7 @@ echo "\n" >> $log
 ##Cluster all sequences in consensus files using kmer in R
 start=$(date +%s.%N)
 cat *consensus.fasta > all_cons.fasta
-${SCRIPTS}/sum_count.py . all
+${SCRIPTS}/05_sum_count.py . all
 
 $VSEARCH --sortbysize all_cons.fasta --output all_cons_sorted.fasta
 
@@ -164,7 +164,7 @@ mv all_cons_sorted.fasta all_cons.fasta
 [ ! -d "tmp" ] && echo "create tmp diretory" && mkdir tmp
 
 #split the sorted fasta file into smaller ones for running minimap2 alignment
-${SCRIPTS}/splitFasta.py all_cons.fasta 10000 tmp
+${SCRIPTS}/06_splitFasta.py all_cons.fasta 10000 tmp
 for fas in tmp/*.fas; do
     prefix=${fas%.fas}
     prefix=${prefix##*/all_cons_}
@@ -173,8 +173,8 @@ done
 
 cat tmp/*.sam | grep -v "^@" > all_cons.sam
 cutoff=0.03
-${SCRIPTS}/parse_minimap2_clr.py all_cons.sam all_cons.clr $cutoff
-${SCRIPTS}/get_OTU_table.py . all_cons.fasta all_cons.clr OTUs
+${SCRIPTS}/07_parse_minimap2_clr.py all_cons.sam all_cons.clr $cutoff
+${SCRIPTS}/08_get_OTU_table.py . all_cons.fasta all_cons.clr OTUs
 
 END=$(date +%s.%N)
 runtime=$(python -c "print(${END} - ${start})")

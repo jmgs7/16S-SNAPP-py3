@@ -77,7 +77,7 @@ echo "    Completed training SeqMatch. Runtime: $runtime sec" >> $log
 echo -e "\nRunning second blast...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
 $BLASTN \
-    -num_threads 4 \
+    -num_threads $THREADS \
     -db asv \
     -max_target_seqs 2000 \
     -query refset.fasta \
@@ -127,7 +127,7 @@ echo "    Making blastDB with dereplicated blastn_2 hits Runtime: $runtime sec" 
 echo -e "\nRunning blastn with all asv seqs against dereplicated blastn_2 hits ...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
 $BLASTN \
-    -num_threads 4 \
+    -num_threads $THREADS \
     -db blastn_2_derep \
     -max_target_seqs 2000 \
     -query asv_uniq.fasta \
