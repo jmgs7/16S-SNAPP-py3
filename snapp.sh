@@ -89,7 +89,6 @@ start=$(date +%s.%N)
 printf '\n' >> $log
 echo -e "\nDADA2 processing stats:" >> $log
 #Prepare asv count tables and sequences in PEs, single formats
-# TODO: Add automatic detection of READLEN based on QC.
 ${SCRIPTS}/01_run_dada2.R trimmed/ . ${QCLIB} ${THREADS} >> $log #run dada2 with R
 # cat "DADA2_summary.csv" | sed -e 's/"//g' >> $log
 ${SCRIPTS}/02_get_asv_files.py asv_seqNcount.csv asv
