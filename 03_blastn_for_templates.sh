@@ -39,9 +39,9 @@ echo "    First Runtime: $runtime sec" >> $log
 #obtain top hits of each query sequence from all samples
 echo -e "\nFiltering the first blast...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
+# Filters by perc_identity and qcov_hsp_perc
 cat blastn_1.txt \
-    # Filters by perc_identity and qcov_hsp_perc.
-    | awk -F '\t' '{if($3 >= 99 && ($4/$13) > 0.99) print $2}' \ 
+    | awk -F '\t' '{if($3 >= 99 && ($4/$13) > 0.99) print $2}' \
     | sort -u \
     > reflist.txt # Reflist contains the IDs from the FILTERED matched reference sequences.
 template_count=$(< reflist.txt wc -l)

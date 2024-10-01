@@ -12,8 +12,8 @@ START=$(date +%s.%N)
 
 if [ $# -ne 3 ]
     then
-         echo 'snapp.sh config.txt inputdir workdir'
-         exit
+        echo 'snapp.sh config.txt inputdir workdir'
+        exit
 fi
 set -e
 set -x
@@ -53,13 +53,14 @@ for R1 in ${INPUTDIR}/*_R1_*fastq.gz; do
 
     #PE option to trim primers off the reads
     $CUTADAPT -e 0.10 -g file:$PRIMERS -G file:$PRIMERS \
-              -o trimmed/${basenameR1} \
-              -p trimmed/${basenameR2} \
-              --untrimmed-output ${prefixR1}_NotTrimmed.fastq \
-              --untrimmed-paired-output ${prefixR2}_NotTrimmed.fastq \
-              $R1 $R2 \
-              --max-n 0 \
-              --minimum-length ${READLEN}
+            -o trimmed/${basenameR1} \
+            -p trimmed/${basenameR2} \
+            --untrimmed-output ${prefixR1}_NotTrimmed.fastq \
+            --untrimmed-paired-output ${prefixR2}_NotTrimmed.fastq \
+            $R1 $R2 \
+            --max-n 0 \
+            --minimum-length ${READLEN} \
+            --cores $THREADS
 
     [[ ! -s trimmed/${basenameR1} ]] \
         && rm trimmed/${basenameR1} \
@@ -89,7 +90,7 @@ printf '\n' >> $log
 echo -e "\nDADA2 processing stats:" >> $log
 #Prepare asv count tables and sequences in PEs, single formats
 # TODO: Add automatic detection of READLEN based on QC.
-${SCRIPTS}/01_run_dada2.R trimmed/ . ${READLEN} >> $log #run dada2 with R
+${SCRIPTS}/01_run_dada2.R trimmed/ . ${QCLIB} ${THREADS} >> $log #run dada2 with R
 # cat "DADA2_summary.csv" | sed -e 's/"//g' >> $log
 ${SCRIPTS}/02_get_asv_files.py asv_seqNcount.csv asv
 
