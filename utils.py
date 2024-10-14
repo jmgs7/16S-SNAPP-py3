@@ -94,7 +94,7 @@ def classify_proxy(sample_id, RDPHOME, WD):
             [
                 os.path.join(RDPHOME, "classifier"),
                 "-f",
-                "fixrank",
+                "allrank",
                 "-o",
                 os.path.join(WD, sample_id + ".cls"),
                 os.path.join(WD, sample_id + "_consensus.fasta"),
