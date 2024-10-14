@@ -17,4 +17,5 @@ PRIMERS=~/Data/Metagenomics/16S-SNAPP_test/16S_DB/Swift_16S_SNAP_primers_v2.fast
 export READLEN=130 #expected minimum read lenght (i.e.: single read length after primer is trimmed)
 export QCLIB=~/Documents/Pipelines/metagenomics/lib/qc_analysis.r #path to qc_analysis.r (from metagenomics-pipeline)
 #export THREADS=4 #number of threads to use for parallel processing
+
 export THREADS=$(nproc --all) #use maximun number of threads available
