@@ -107,7 +107,7 @@ start=$(date +%s.%N)
 if [[ -z $RDP_CLASSIFIER ]]
 then
     ${RDPHOME}/classifier \
-        -f fixrank \
+        -f allrank \
         -o asv_PE.cls \
         asv_PE.fasta # It uses the merged pair-end reads.
 else

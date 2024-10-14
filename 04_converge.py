@@ -243,6 +243,8 @@ def converge(
     seq_name = os.path.join(WD, sample_id + "_consensus.fasta")
     with open(seq_name, "w") as conseq:  # write consensus seqs to a file
         conseq.write(consensus_seqs)
+
+    ################## THIS IS THE CLASSIFICATION STEP ################
     classify_proxy(sample_id, RDPHOME, WD)  # classify consensus sequences
     refset = add_lineages(
         WD, sample_id, pe_lineage_dict, refset

@@ -8,14 +8,14 @@ export MAKEBLASTDB=~/anaconda3/envs/16S-SNAPP/bin/makeblastdb
 export BLASTN=~/anaconda3/envs/16S-SNAPP/bin/blastn
 
 ## database paths
-export RDP_FULL_BLAST=~/Data/Metagenomics/16S-SNAPP_test/16S_DB/rdp11_5
-export RDP_FULL_SEQ=~/Data/Metagenomics/16S-SNAPP_test/16S_DB/rdp11_5.fasta
+export RDP_FULL_BLAST=~/Data/Ref/16S_SNAPP_DB/rdp11_5
+export RDP_FULL_SEQ=~/Data/Ref/16S_SNAPP_DB/rdp11_5.fasta
 #export RDP_CLASSIFIER=/path-to/rRNAClassifier.properties #path to custom trained RDP Classifier
 
 ## primers and other settings
-PRIMERS=~/Data/Metagenomics/16S-SNAPP_test/16S_DB/Swift_16S_SNAP_primers_v2.fasta #primer file formatted paired-end primer trimming
+PRIMERS=~/Data/Ref/16S_SNAPP_DB/Swift_16S_SNAP_primers_v2.fasta #primer file formatted paired-end primer trimming
 export READLEN=130 #expected minimum read lenght (i.e.: single read length after primer is trimmed)
-export QCLIB=~/Documents/Pipelines/metagenomics/lib/qc_analysis.r #path to qc_analysis.r (from metagenomics-pipeline)
+export QCLIB=~/Pipelines/metagenomics/lib/qc_analysis.r #path to qc_analysis.r (from metagenomics-pipeline)
 #export THREADS=4 #number of threads to use for parallel processing
 
 export THREADS=$(nproc --all) #use maximun number of threads available
