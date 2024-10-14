@@ -318,8 +318,8 @@ taxonomy_series_list = []
 template_mapped_seqs_dict = {}  # template seqs for associated reads
 
 ###############################################################################################
-# Process one sample at a time                                                                 #
-# for sample_id in rDF.columns:                                                                #
+# Process one sample at a time                                                                #
+# for sample_id in rDF.columns:                                                               #
 #    collapsed, featCounts, featTax, templates_mapped_seqs_dict_sample = \ converge(sample_id)#
 #    lineage_count_series_list.append(collapsed)                                              #
 #    feature_count_series_list.append(featCounts)                                             #
@@ -328,17 +328,19 @@ template_mapped_seqs_dict = {}  # template seqs for associated reads
 ###############################################################################################
 
 ###############################################################################
-# Multi-processing by process pooling. Use caution when applying this option   #
-all_completed = []  # to collect abundance for each sample when it's completed  #
-with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:  #
-    results = [executor.submit(converge, sample) for sample in rDF.columns]  #
-    for f in concurrent.futures.as_completed(results):  #
-        all_completed.append(f.result())  #
-for sample_rs in all_completed:  #
-    lineage_count_series_list.append(sample_rs[0])  #
-    feature_count_series_list.append(sample_rs[1])  #
-    taxonomy_series_list.append(sample_rs[2])  #
-    template_mapped_seqs_dict.update(sample_rs[3])  # template seqs for assoc   #
+# Multi-processing by process pooling. Use caution when applying this option
+all_completed = []  # to collect abundance for each sample when it's completed
+with concurrent.futures.ProcessPoolExecutor(
+    max_workers=int(os.environ.get("THREADS"))
+) as executor:
+    results = [executor.submit(converge, sample) for sample in rDF.columns]
+    for f in concurrent.futures.as_completed(results):
+        all_completed.append(f.result())
+for sample_rs in all_completed:
+    lineage_count_series_list.append(sample_rs[0])
+    feature_count_series_list.append(sample_rs[1])
+    taxonomy_series_list.append(sample_rs[2])
+    template_mapped_seqs_dict.update(sample_rs[3])  # template seqs for assoc
 ###############################################################################
 
 # Render the abundance and taxonomy tables

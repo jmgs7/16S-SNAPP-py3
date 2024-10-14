@@ -3,7 +3,9 @@
 ## Author Benli Chai & Sukhinder Sandhu 20200502
 
 #Run blastn three times with different DBs and queries to make increasingly
-#more complete sets of matches between reads and reference
+#more complete sets of matches between reads and reference.
+# The first and second blasn allow to filter the RDP DB to include only sequences that are likely to be found in the samples.
+# The third one is the one that will be used to determine which of the reference sequences could be considered to be present in the sample and be used as a bona fide full 16S sequence.
 
 ##Format a blastDB of asv for second blast in order to capture a more complete
 #set of matches
@@ -11,7 +13,7 @@ echo -e "\nMaking ASV blast DB...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
 $MAKEBLASTDB \
     -dbtype nucl \
-    -in asv_uniq.fasta  \
+    -in asv_uniq.fasta \
     -out asv
 
 echo "    Ends: $(date)">>$log
@@ -20,8 +22,10 @@ runtime=$(python -c "print(${end} - ${start})")
 echo "    Making ASV blastDB Runtime: $runtime sec" >> $log
 
 ##Blast the pre-formatted reference DB to find the hits above the cutoff
+# In this first blast step, we use the full reference database from RDP and filter the templates that have a high quality hit.
 echo -e "\nRunning first blast...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
+# Output format: 6 (BLAST standard output format), std (Standard output), include: qlen (query length), slen (subject length).
 $BLASTN \
     -num_threads $THREADS \
     -db ${RDP_FULL_BLAST} \
@@ -29,7 +33,7 @@ $BLASTN \
     -out blastn_1.txt \
     -outfmt "6 std qlen slen" \
     -perc_identity 97 \
-    -qcov_hsp_perc 97
+    -qcov_hsp_perc 97 # % identity and query coverage cutoffs
 
 echo "    Ends: $(date)">>$log
 end=$(date +%s.%N)
@@ -46,8 +50,9 @@ cat blastn_1.txt \
     > reflist.txt # Reflist contains the IDs from the FILTERED matched reference sequences.
 template_count=$(< reflist.txt wc -l)
 
-# Filters the fastq of the refset to only include the filtered matchedreference sequences.
-cut -f2 blastn_1.txt | sort -u > exp_reflist.txt # exp_reflist contains the IDs from ALL the matched reference sequences.
+# Filters the fastq of the refset to only include the filtered matched reference sequences.
+# This file is used in the next step. The objective of the first two blastn is to "enrich" the reference set to include only sequences that are likely to be found in the samples.
+cut -f2 blastn_1.txt | sort -u > exp_reflist.txt # exp_reflist contains the IDs from ALL the matched reference sequences..
 ${RDPHOME}/ReadSeq \
     select-seqs exp_reflist.txt  \
     exp_refset.fasta fasta Y ${RDP_FULL_SEQ}
@@ -63,6 +68,7 @@ echo -e "\nExtracting ${template_count} preliminary candidate template sequences
 echo "    Completed parsing first blast. Runtime: $runtime sec" >> $log
 
 # Prepare SeqMatch DBecho -e "\nFormatting SeqMatch DB ...\n    Starts: $(date)">>$log
+# This is a clustering step.
 start=$(date +%s.%N)
 [  -d seqmatch ] && echo "Directory seqmatch does exist, please delete..." && exit
 mkdir seqmatch
