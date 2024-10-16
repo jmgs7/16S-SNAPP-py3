@@ -106,8 +106,9 @@ echo -e "\nRunning RDP classifier...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
 if [[ -z $RDP_CLASSIFIER ]]
 then
+# Change -f fixrank to -f allrank when uses a custon classifier with species-level resolution.
     ${RDPHOME}/classifier \
-        -f allrank \
+        -f fixrank \
         -o asv_PE.cls \
         asv_PE.fasta # It uses the merged pair-end reads.
 else
