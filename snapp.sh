@@ -112,7 +112,8 @@ then
         -o asv_PE.cls \
         asv_PE.fasta # It uses the merged pair-end reads.
 else
-    ${RDPHOME}/classifier \
+    # Use local git instalation to avoid memory overload of conda's RDP classifier binary.
+    java -jar -Xmx8g ${RDPHOME_CUSTOM}/classifier.jar \
         -t $RDP_CLASSIFIER \
         -o asv_PE.cls \
         asv_PE.fasta

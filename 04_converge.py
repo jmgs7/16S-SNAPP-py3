@@ -245,7 +245,7 @@ def converge(
         conseq.write(consensus_seqs)
 
     ################## THIS IS THE CLASSIFICATION STEP ################
-    classify_proxy(sample_id, RDPHOME, WD)  # classify consensus sequences
+    classify_proxy(sample_id, RDPHOME, RDPHOME_CUSTOM, WD)  # classify consensus sequences
     refset = add_lineages(
         WD, sample_id, pe_lineage_dict, refset
     )  # load the best assignment from asv_PEs and the proxies
@@ -290,6 +290,7 @@ start_time = timeit.default_timer()
 # environmental variables
 WD = os.environ["WD"]  # work directory
 RDPHOME = os.environ["RDPHOME"]
+RDPHOME_CUSTOM = os.environ["RDPHOME_CUSTOM"]
 RESDIR = os.environ["RESDIR"]
 readseqJar = os.path.join(RDPHOME, "ReadSeq")
 ref_db_path = os.path.join(WD, "refset.fasta")

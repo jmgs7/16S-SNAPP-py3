@@ -72,7 +72,7 @@ class Name_proxy:
 
 
 ## classify consensus sequences in batch, fetch, and add assignments to Refseq objects
-def classify_proxy(sample_id, RDPHOME, WD):
+def classify_proxy(sample_id, RDPHOME, RDPHOME_CUSTOM, WD):
     import subprocess
     import os
 
@@ -80,8 +80,9 @@ def classify_proxy(sample_id, RDPHOME, WD):
     try:
         train_set = os.environ["RDP_CLASSIFIER"]  # use the specified training set
         subprocess.check_call(
-            [
-                os.path.join(RDPHOME, "classifier"),
+            # Use local git instalation to avoid memory overload of conda's RDP classifier binary.
+            ["java", "-jar", "-Xmx8g",
+                os.path.join(RDPHOME_CUSTOM, "classifier.jar"),
                 "-t",
                 train_set,
                 "-o",
@@ -91,8 +92,7 @@ def classify_proxy(sample_id, RDPHOME, WD):
         )
     except KeyError:  # use default training set
         subprocess.check_call(
-            [
-                os.path.join(RDPHOME, "classifier"),
+            [os.path.join(RDPHOME, "classifier"),
                 "-f",
                 "fixrank",  # Change -f fixrank to -f allrank when uses a custon classifier with species-level resolution.
                 "-o",
