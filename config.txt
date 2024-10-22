@@ -6,7 +6,7 @@ VSEARCH=~/anaconda3/envs/16S-SNAPP/bin/vsearch
 export RDPHOME=~/anaconda3/envs/16S-SNAPP/bin
 
 # Because the classifier bin from the conda distribution only supports 1GB maximun heap size, memory overload is common. 
-# For custom RDP classifiers, we will use a git installation of RDPTools with the -Xmx8g  optiom to set the maximun heap size to 8GB.
+# For custom RDP classifiers, we will use a git installation of RDPTools with the -Xmx8g optiom to set the maximun heap size to 8GB.
 export RDPHOME_CUSTOM=~/Software/RDPTools
 export MAKEBLASTDB=~/anaconda3/envs/16S-SNAPP/bin/makeblastdb
 export BLASTN=~/anaconda3/envs/16S-SNAPP/bin/blastn

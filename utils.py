@@ -9,6 +9,23 @@
 def get_ref_read_df(
     refset, count_table
 ):  # to obtain a ref-read dataframe with count value for each sample
+    """
+    Construct a ref-read dataframe with count value for each sample
+
+    Parameters
+    ----------
+    refset : list of Refseq objects
+        List of Refseq objects
+    count_table : dict
+        Dictionary of read IDs to their counts
+
+    Returns
+    -------
+    pandas.DataFrame
+        Dataframe with columns as reference IDs and index as read IDs, and
+        values as the count of each read mapped to the reference
+
+    """
     import pandas as pd
 
     id_dict = {ref.ID: {} for ref in refset}
@@ -16,7 +33,7 @@ def get_ref_read_df(
         ref_id = refseq.ID
         read_ids = refseq.getReadIDs()
         id_dict[ref_id] = {read_id: count_table[read_id] for read_id in read_ids}
-    return pd.DataFrame.from_dict(id_dict)  # dictioary to a DF
+    return pd.DataFrame.from_dict(id_dict)  # dictionary to a DF
 
 
 # add reference`sequence strings to refseq objects

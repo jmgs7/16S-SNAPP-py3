@@ -53,6 +53,9 @@ def align_seqs(refseq, pe_seq_dict, tmp_dir):
     return (aligned, read_count_list)
 
 
+# TODO: Discover function of get_consensus function.
+
+
 def get_consensus(rdp_k1_alignment, count_list):
     import pandas as pd
 

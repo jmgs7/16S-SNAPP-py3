@@ -19,6 +19,20 @@ def derep_refset(refset):
 
 def converge_ref(refset):
     # sort refset in descending order by the number of covered bases and then by read count
+    """
+    Converge the reference set.
+
+    The reference set is sorted in descending order by the number of covered bases
+    and then by read count. The converged reference set is then selected based on
+    the coverage of reads. The converged reference set is the minimal set of
+    references that cover all the reads.
+
+    Parameters:
+    refset (list): List of Refseq objects
+
+    Returns:
+    list: Converged reference set
+    """
     refset.sort(key=lambda x: (len(x.positions), len(x.getReadIDs())), reverse=True)
     all_read_ids = set([])
     ref2read_dict = {}

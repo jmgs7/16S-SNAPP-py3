@@ -84,8 +84,8 @@ for sample_name in list(count_table.keys()):
 
 # output the abundance table in simplified IDs
 df = pd.DataFrame(new_dict).fillna(0)
-df.to_csv(outname + "_count.txt", sep="\t")
+df.to_csv(outname + "_count.tsv", sep="\t")
 
-tax_out = open(outname + "_taxonomy.txt", "w")
+tax_out = open(outname + "_taxonomy.tsv", "w")
 for f, t in new_tax.items():
     tax_out.write(f + "\t" + t + "\n")
