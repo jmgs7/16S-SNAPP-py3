@@ -154,6 +154,9 @@ runtime=$(python -c "print(${end} - ${start})")
 echo "    Converging Runtime: $runtime sec" >> $log
 echo "\n" >> $log
 
+
+########## NEW EXPERIMENTAL PIPELINE ##########
+
 ##Cluster all sequences in consensus files using kmer in R
 start=$(date +%s.%N)
 cat *consensus.fasta > all_cons.fasta

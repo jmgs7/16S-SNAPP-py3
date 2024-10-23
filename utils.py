@@ -24,8 +24,8 @@ def get_ref_read_df(
     pandas.DataFrame
         Dataframe with columns as reference IDs and index as read IDs, and
         values as the count of each read mapped to the reference
-
     """
+
     import pandas as pd
 
     id_dict = {ref.ID: {} for ref in refset}
@@ -59,6 +59,7 @@ def fetch_refseq(RDPHOME, id_file_name, outfile_name, reffile_name):
         1 if the command was successfully called.
 
     """
+
     import subprocess
     import os
 
@@ -104,6 +105,7 @@ def update_refseq(
     dict
         The updated dictionary of Refseq objects with added attributes.
     """
+
     recs = open(reffile_name, "r").read().strip(">").split("\n>")
     # Iterate all refseq objects for multiple tasks
     for rec in recs:
@@ -157,6 +159,7 @@ def classify_proxy(sample_id, RDPHOME, RDPHOME_CUSTOM, WD):
     int
         Returns 1 to indicate the classification was executed successfully.
     """
+
     import subprocess
     import os
 
@@ -165,7 +168,10 @@ def classify_proxy(sample_id, RDPHOME, RDPHOME_CUSTOM, WD):
         train_set = os.environ["RDP_CLASSIFIER"]  # use the specified training set
         subprocess.check_call(
             # Use local git instalation to avoid memory overload of conda's RDP classifier binary.
-            ["java", "-jar", "-Xmx8g",
+            [
+                "java",
+                "-jar",
+                "-Xmx8g",
                 os.path.join(RDPHOME_CUSTOM, "classifier.jar"),
                 "-t",
                 train_set,
@@ -176,7 +182,8 @@ def classify_proxy(sample_id, RDPHOME, RDPHOME_CUSTOM, WD):
         )
     except KeyError:  # use default training set
         subprocess.check_call(
-            [os.path.join(RDPHOME, "classifier"),
+            [
+                os.path.join(RDPHOME, "classifier"),
                 "-f",
                 "fixrank",  # Change -f fixrank to -f allrank when uses a custon classifier with species-level resolution.
                 "-o",
@@ -207,6 +214,7 @@ def build_tree(
     int
         Returns 1 to indicate the tree building was successful.
     """
+
     import os
 
     aligned = os.path.join(WD, "templates_mafft.fasta")
@@ -251,6 +259,7 @@ def run_seqmatch(folder_name, WD):  # run seqmatch of PE in parallel processing 
     in a dictionary where the keys are the file names and the values are the
     SequenceMatch results.
     """
+
     import os
     import concurrent.futures
 
@@ -262,7 +271,9 @@ def run_seqmatch(folder_name, WD):  # run seqmatch of PE in parallel processing 
     ]
     # all_seq_matches = []
     rs_dict = {}  # all SequenceMatch results
-    with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=int(os.environ.get("THREADS"))
+    ) as executor:
         results = [executor.submit(seq_match, WD, fname) for fname in fnames]
         for f in concurrent.futures.as_completed(results):
             # all_seq_matches.append(f.result())
@@ -286,6 +297,7 @@ def seq_match(WD, QUERY):  # function to run seqmatch
     dict
         A dictionary of SequenceMatch results.
     """
+
     import os
 
     DB = os.path.join(WD, "seqmatch")
@@ -318,6 +330,7 @@ def read_seq(seqfile_name):
     dict
         A dictionary of sequences.
     """
+
     seq_dict = {}
     recs = open(seqfile_name, "r").read().strip(">").split("\n>")
     for rec in recs:
@@ -329,6 +342,20 @@ def read_seq(seqfile_name):
 
 
 def rev_complement(seq):
+    """
+    Compute the reverse complement of a given DNA sequence.
+
+    Parameters
+    ----------
+    seq : str
+        The DNA sequence.
+
+    Returns
+    -------
+    str
+        The reverse complement of the given DNA sequence.
+    """
+
     anticodon = {
         "A": "T",
         "T": "A",

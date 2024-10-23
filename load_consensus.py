@@ -159,6 +159,7 @@ def consensus_loader(sample_id, refseq, pe_seq_dict, tmp_dir):
     seq : str
         The consensus sequence in FASTA format.
     """
+    
     alignment, count_series = align_seqs(refseq, pe_seq_dict, tmp_dir)
     size = round(
         np.array(count_series).sum(), 3

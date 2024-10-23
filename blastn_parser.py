@@ -31,7 +31,6 @@ def derep_refset(refset):
 
 
 def converge_ref(refset):
-    # sort refset in descending order by the number of covered bases and then by read count
     """
     Converge the reference set.
 
@@ -40,12 +39,16 @@ def converge_ref(refset):
     the coverage of reads. The converged reference set is the minimal set of
     references that cover all the reads.
 
-    Parameters:
+    Parameters
+    ----------
     refset (list): List of Refseq objects
 
-    Returns:
+    Returns
+    -------
     list: Converged reference set
     """
+
+    # sort refset in descending order by the number of covered bases and then by read count
     refset.sort(key=lambda x: (len(x.positions), len(x.getReadIDs())), reverse=True)
     all_read_ids = set([])
     ref2read_dict = {}
@@ -116,10 +119,10 @@ def get_blastn_hits(blastn, uc_filename):
     -------
     tuple
         A tuple containing:
-        - hit_info (dict): A dictionary where keys are subject IDs (sid) 
-          and values are dictionaries mapping ASV IDs to lists containing 
+        - hit_info (dict): A dictionary where keys are subject IDs (sid)
+          and values are dictionaries mapping ASV IDs to lists containing
           start and end coordinates of hits.
-        - rc_set (set): A set of ASV IDs that are in reverse-complement 
+        - rc_set (set): A set of ASV IDs that are in reverse-complement
           orientation with respect to the reference sequences.
     """
     read2rep = get_id_dict(uc_filename)
@@ -161,8 +164,8 @@ def get_id_dict(uc_filename):
     """
     Generate a mapping of sequence IDs to their representative IDs from a UC file.
 
-    This function reads a UC file and creates a dictionary where each key is a 
-    sequence ID, and the value is its representative ID unless the representative 
+    This function reads a UC file and creates a dictionary where each key is a
+    sequence ID, and the value is its representative ID unless the representative
     ID is '*', in which case the sequence ID maps to itself.
 
     Parameters

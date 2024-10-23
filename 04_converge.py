@@ -23,20 +23,23 @@ def assign_read_counts(sampleID, readCounts, hits_info):
     """
     Take the blast results and converge reads to their likely templates.
 
-    Parameters:
-    sampleID (str): Sample ID
-    readCounts (pandas.DataFrame): Read counts for each sample
-    hits_info (list of dict): Blast results for each reference
+    Parameters
+    ----------
+        - sampleID (str): Sample ID
+        - readCounts (pandas.DataFrame): Read counts for each sample
+        - hits_info (list of dict): Blast results for each reference
 
-    Returns:
-    refset (dict): Reference set (keys: reference IDs, values: Refseq objects)
-    refseq_PE_list (list): List of Refseq objects for each pair of reads
+    Returns
+    -------
+        - refset (dict): Reference set (keys: reference IDs, values: Refseq objects)
+        - refseq_PE_list (list): List of Refseq objects for each pair of reads
     """
+
     print("Allocating multi-mapped read counts for sample", sampleID)
     print("Total mapped references:", len(hits_info))
     refSet_start_time = timeit.default_timer()
 
-    ##1. instantiate refseq objects to associate reads
+    ##1. Instantiate refseq objects to associate reads
     refset, refseq_PE_list = initiate_refset(hits_info)
     print("Pre-reduction refset size:", len(refset))
     print("Number of matched PEs:", len(refseq_PE_list))
@@ -110,21 +113,22 @@ def assign_read_counts(sampleID, readCounts, hits_info):
 def get_len_stats(sample_id, refset):
     """
     Obtain alignment length distributions: per refseq and normalized by readCounts.
-    
+
     Parameters
     ----------
-    sample_id : str
-        Sample ID
-    refset : dict
-        Reference set (keys: reference IDs, values: Refseq objects)
-    
+        - sample_id : str
+            Sample ID
+        - refset : dict
+            Reference set (keys: reference IDs, values: Refseq objects)
+
     Returns
     -------
-    tuple
-        Two pandas Series objects: one containing the distribution of alignment
-        lengths across all reference sequences, the other containing the distribution
+    - tuple: Two pandas Series objects:
+        - One containing the distribution of alignment lengths across all reference sequences.
+        - The other containing the distribution
         of alignment lengths across all ASVs (normalized by read counts).
     """
+
     length_per_refseq = []
     length_norm_readcount = []
     for refID in refset:
@@ -150,15 +154,15 @@ def get_len_stats(sample_id, refset):
 
 
 ##cluster consensus and asv sequences from all samples and make an abundance table with taxonomic assignments
-def get_cluster_tbl(wd): # THIS FUNCTION IS NOT USED.
+def get_cluster_tbl(wd):  # THIS FUNCTION IS NOT USED.
     """
     Clusters consensus and asv sequences from all samples and make an abundance table with taxonomic assignments.
-    
+
     Parameters
     ----------
-    wd : str
+    - wd : str
         Path to the working directory.
-    
+
     Returns
     -------
     None
@@ -177,14 +181,16 @@ def get_cluster_tbl(wd): # THIS FUNCTION IS NOT USED.
 
 def combine_lineage_count(sample_id, refset, unmapped_list):
     """
-    Combines lineage counts from reference sequences and unmapped ASVs, providing feature counts collapsed by lineage.
+    This function combines the counts and taxonomic assignments from connsensus sequences and unmapped ASVs. The unmmapped ASVs are matched to the reference sequences using RDP SequenceMatch and the closest reference sequence inherits the ASV's coutns and taxonomic assignments (if better than the one that is found in the refseq). Finally, it collapses all counts of a sample by its lineages (each unique taxonomic prediction).
 
-    Parameters:
+    Parameters
+    ----------
     - sample_id (str): The sample ID associated with the lineage counts.
     - refset (dict): Dictionary of reference sequences.
     - unmapped_list (list): List of unmapped ASVs.
 
-    Returns:
+    Returns
+    -------
     - tuple: A tuple containing the following dictionaries:
         - Hash (dict): The feature counts collapsed by lineage.
         - feature_counts_dict (dict): The count series of associated and unassociated reads using the IDs of the templates.
@@ -193,7 +199,7 @@ def combine_lineage_count(sample_id, refset, unmapped_list):
     """
 
     # This functions combines lineage counts from reference sequences and unmapped ASVs and collapses all counts of a sample by its lineages (each unique taxonomic prediction).
-    
+
     refseqs = refset.values()
     Hash = {}  # to hold the feature counts collapsed by lineage
 
@@ -222,7 +228,9 @@ def combine_lineage_count(sample_id, refset, unmapped_list):
         else:
             Hash[lineage] += count
 
-    # second fetch lineage-counts of unmapped asvs
+    # Second, fetch lineage-counts of unmapped asvs.
+    # The un unmapped ASVs lineages and counts will be assigned to the the nearest refseq obtained from RDP SequenceMatch
+    # (if they pass the SequenceMatch threshold).
     for asvID in unmapped_list:
         lineage = pe_lineage_dict[asvID].strip()
         count = rDF.loc[asvID, sample_id]
@@ -233,17 +241,18 @@ def combine_lineage_count(sample_id, refset, unmapped_list):
             # beyond the seqmatch cutoff
 
             continue
-        # Assign count and lineage of asvs to reference IDs
+        # Assign count and lineage of asvs to reference IDs.
+        # If the refseq is not in the dictionary, add it. It will inherit the count and lineage of the ASV.
         if not k1_ID in feature_counts_dict.keys():
             feature_counts_dict[k1_ID] = count
             feature_taxa_dict[k1_ID] = lineage
-        else:
+        else:  # If the refseq is already in the dictionary, check if the lineage is better.
             if lineage.count(";") > feature_taxa_dict[k1_ID].count(
                 ","
-            ):  # pick the better assignmentSample
+            ):  # Pick the better taxonomic assignment (the lower the level the most ; or , are in the taxonomic lineage string).
                 feature_counts_dict[k1_ID] += count
                 feature_taxa_dict[k1_ID] = (
-                    lineage  # replace with this better asssignment
+                    lineage  # replace with this better taxonomic asssignment
                 )
             else:
                 feature_counts_dict[k1_ID] += count
@@ -256,29 +265,41 @@ def combine_lineage_count(sample_id, refset, unmapped_list):
 
 def converge(
     sample_id,
-):  # converge each sample calculating all required attributes of the refset
+):
     """
-    Converge each sample calculating all required attributes of the refset.
-    Parameters:
-    sample_id (str): Sample ID
-    Returns:
-    collapsed_series (pandas.DataFrame): Abundance dataframe of all lineages in this sample
-    feat_count_series (pandas.DataFrame): Count dataframe of all features in this sample
-    feat_tax_series (pandas.DataFrame): Lineage dataframe of all features in this sample
-    feat_tempSeq_dict (dict): Template sequence dictionary of all features in this sample
+    Converge ASV sequences to reference sequences using BLASTN results.
+
+    Parameters
+    ----------
+        - sample_id : str
+            Sample ID.
+
+    Returns
+    -------
+        - collapsed_counts : pandas.DataFrame
+            DataFrame of collapsed lineage counts of a sample.
+        - feature_counts : pandas.DataFrame
+            DataFrame of feature (lineage) counts of a sample.
+        - feature_taxa : pandas.DataFrame
+            DataFrame of feature (lineage) taxonomic assignments of a sample.
+        - feature_template_seqs_dict : dict
+            Dictionary of feature (lineage) template sequences of a sample.
     """
+
+    # Converge each sample calculating all required attributes of the refset.
+
     sample_count = rDF.loc[:, sample_id]  # asv count series of this sample
 
     sample_count_series = sample_count[
         sample_count > 0
-    ]  # drop 0's count series of this sample
+    ]  # Drop 0's count series of this sample
     sample_read_count = len(sample_count_series)
 
-    # load previously pickled blastn results as a dictionary for this sample
+    # Load previously pickled blastn results as a dictionary for this sample
     blastn_pickle = os.path.join(WD, "pickle/" + sample_id + ".pkl")
     blastn_match_dict = pd.read_pickle(blastn_pickle)
 
-    # call assign_read_counts function to converge the asv PEs
+    # Call assign_read_counts function to converge the asv PEs
     refset, mapped_ASV_IDs = assign_read_counts(
         sample_id, sample_count_series, blastn_match_dict
     )
@@ -366,7 +387,7 @@ RESDIR = os.environ["RESDIR"]
 readseqJar = os.path.join(RDPHOME, "ReadSeq")
 ref_db_path = os.path.join(WD, "refset.fasta")
 
-# Three arguments#
+# Three arguments
 count_table = sys.argv[1]  # countable using asv representative IDs
 pe_seq_dict = read_seq(sys.argv[2])  # PE reads
 read_cls = sys.argv[3]  # assignment of asv PEs
@@ -380,7 +401,9 @@ pe_lineage_dict = get_lineages(read_cls, 0.7)
 
 converge_start = timeit.default_timer()
 
-# run parallel processing on seqmatch
+# Run parallel processing on seqmatch.
+# In this step the unmapped ASVs are matched to the closest reference sequence by k-mer analysis with RDP SeqMatch.
+# The matched sequence inhertis the taxonomic assignment and count of the original asv PE.
 seq_match_tmp = os.path.join(WD, "asv_tmp")
 K1_dict = run_seqmatch(seq_match_tmp, WD)
 
