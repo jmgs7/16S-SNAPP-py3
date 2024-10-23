@@ -202,7 +202,7 @@ def load_consensus(sample_id, refset, pe_seq_dict, wd):
     tmp_dir = os.path.join(wd, sample_id.split("_R1")[0])
     os.system("mkdir %s" % tmp_dir)  # Crates a temp directory
     with concurrent.futures.ProcessPoolExecutor(
-        max_workers=int(os.environ.get("THREADS"))
+        max_workers=int(os.environ.get("THREADS")) # type: ignore
     ) as executor:
         results = [
             executor.submit(consensus_loader, sample_id, refseq, pe_seq_dict, tmp_dir)
