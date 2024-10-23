@@ -38,6 +38,27 @@ def get_ref_read_df(
 
 # add reference`sequence strings to refseq objects
 def fetch_refseq(RDPHOME, id_file_name, outfile_name, reffile_name):
+    """
+    Fetch the reference sequences from the reference database based on the IDs in the
+    file, and write the sequences to a new file.
+
+    Parameters
+    ----------
+    RDPHOME : str
+        The path to the RDPTools directory.
+    id_file_name : str
+        The name of the file containing the reference IDs.
+    outfile_name : str
+        The name of the output file to write the sequences to.
+    reffile_name : str
+        The name of the reference file to fetch the sequences from.
+
+    Returns
+    -------
+    int
+        1 if the command was successfully called.
+
+    """
     import subprocess
     import os
 
@@ -62,6 +83,27 @@ def fetch_refseq(RDPHOME, id_file_name, outfile_name, reffile_name):
 def update_refseq(
     DF, reffile_name, refset
 ):  # add additional attributes to the refseq objects
+    """
+    Add additional attributes to the Refseq objects.
+
+    This function reads a reference file to extract sequences and updates
+    the Refseq objects in the provided refset with the full-length sequence,
+    read counts, and mapped regions.
+
+    Parameters
+    ----------
+    DF : pandas.DataFrame
+        The dataframe containing read counts for each reference.
+    reffile_name : str
+        The name of the reference file containing sequences.
+    refset : dict
+        A dictionary of Refseq objects keyed by reference ID.
+
+    Returns
+    -------
+    dict
+        The updated dictionary of Refseq objects with added attributes.
+    """
     recs = open(reffile_name, "r").read().strip(">").split("\n>")
     # Iterate all refseq objects for multiple tasks
     for rec in recs:
@@ -90,6 +132,31 @@ class Name_proxy:
 
 ## classify consensus sequences in batch, fetch, and add assignments to Refseq objects
 def classify_proxy(sample_id, RDPHOME, RDPHOME_CUSTOM, WD):
+    """
+    Classify consensus sequences using the RDP classifier.
+
+    This function classifies consensus sequences for a given sample using the
+    RDP classifier. It attempts to use a custom training set specified in the
+    environment variable `RDP_CLASSIFIER`. If not available, it falls back to
+    using the default training set.
+
+    Parameters
+    ----------
+    sample_id : str
+        The sample ID for which consensus sequences are classified.
+    RDPHOME : str
+        The path to the RDPTools directory containing the default classifier.
+    RDPHOME_CUSTOM : str
+        The path to the custom RDPTools directory containing a custom classifier.
+    WD : str
+        The working directory where input consensus sequences are stored and
+        output classifications will be saved.
+
+    Returns
+    -------
+    int
+        Returns 1 to indicate the classification was executed successfully.
+    """
     import subprocess
     import os
 
@@ -123,6 +190,23 @@ def classify_proxy(sample_id, RDPHOME, RDPHOME_CUSTOM, WD):
 def build_tree(
     seqfile_name, WD, RESDIR
 ):  # make a phylogenetic tree from template sequences
+    """
+    Make a phylogenetic tree from template sequences.
+
+    Parameters
+    ----------
+    seqfile_name : str
+        File name of the fasta file containing the template sequences.
+    WD : str
+        Working directory where the aligned file will be saved.
+    RESDIR : str
+        Directory where the tree will be saved.
+
+    Returns
+    -------
+    int
+        Returns 1 to indicate the tree building was successful.
+    """
     import os
 
     aligned = os.path.join(WD, "templates_mafft.fasta")
@@ -145,6 +229,28 @@ def build_tree(
 
 
 def run_seqmatch(folder_name, WD):  # run seqmatch of PE in parallel processing mode
+    """
+    Run seqmatch in parallel processing mode for paired end sequences.
+
+    Parameters
+    ----------
+    folder_name : str
+        The folder name containing the split files of paired end sequences.
+    WD : str
+        The working directory where the seqmatch DB is located.
+
+    Returns
+    -------
+    dict
+        A dictionary of SequenceMatch results.
+
+    Notes
+    -----
+    This function will run seqmatch for all the split files of paired end
+    sequences in the specified folder in parallel mode. The results are stored
+    in a dictionary where the keys are the file names and the values are the
+    SequenceMatch results.
+    """
     import os
     import concurrent.futures
 
@@ -165,6 +271,21 @@ def run_seqmatch(folder_name, WD):  # run seqmatch of PE in parallel processing 
 
 
 def seq_match(WD, QUERY):  # function to run seqmatch
+    """
+    Run seqmatch for a query fasta file.
+
+    Parameters
+    ----------
+    WD : str
+        The working directory where the seqmatch DB is located.
+    QUERY : str
+        The path to the query fasta file.
+
+    Returns
+    -------
+    dict
+        A dictionary of SequenceMatch results.
+    """
     import os
 
     DB = os.path.join(WD, "seqmatch")
@@ -183,6 +304,20 @@ def seq_match(WD, QUERY):  # function to run seqmatch
 
 
 def read_seq(seqfile_name):
+    """
+    Read a fasta file and return a dictionary of sequences where the keys are
+    the sequence IDs and the values are the sequences.
+
+    Parameters
+    ----------
+    seqfile_name : str
+        The path to the fasta file.
+
+    Returns
+    -------
+    dict
+        A dictionary of sequences.
+    """
     seq_dict = {}
     recs = open(seqfile_name, "r").read().strip(">").split("\n>")
     for rec in recs:

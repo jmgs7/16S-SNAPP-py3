@@ -11,6 +11,21 @@ import sys
 from itertools import islice
 
 def remove_non_template_positions(template_base_list, read_base_list):
+    """
+    remove_non_template_positions
+
+    Parameters
+    ----------
+    template_base_list : list
+        List of template bases
+    read_base_list : list
+        List of read bases
+
+    Returns
+    -------
+    read_base_list_mp : list
+        List of read bases, but with non-template positions removed
+    """
     read_base_list_mp = [] #base positions exist on the template
     for i in range(len(template_base_list)):
         if not template_base_list[i] == '-':
@@ -19,6 +34,21 @@ def remove_non_template_positions(template_base_list, read_base_list):
 
 #read and convert each pair-wise alignments of all reads to the template
 def get_align_array_bk(filename):
+    """
+    Read and convert each pair-wise alignment of all reads to the template.
+
+    Parameters
+    ----------
+    filename : str
+        The path to the file containing pair-wise alignment data.
+
+    Returns
+    -------
+    align_list : list
+        A list of read alignments with non-template positions removed.
+    read_ids : list
+        A list of read IDs corresponding to each alignment.
+    """
     align_list = []
     read_ids = []
     with open(filename, 'r') as infile:
@@ -38,6 +68,21 @@ def get_align_array_bk(filename):
     return align_list, read_ids
 
 def get_align_array(alignment_lines):
+    """
+    Read and convert each pair-wise alignment of all reads to the template.
+
+    Parameters
+    ----------
+    alignment_lines : list
+        A list of lines from the pair-wise alignment file.
+
+    Returns
+    -------
+    align_list : list
+        A list of read alignments with non-template positions removed.
+    read_ids : list
+        A list of read IDs corresponding to each alignment.
+    """
     align_list = []
     read_ids = []
     i = 2

@@ -11,6 +11,20 @@ import sys
 
 # To make reference-to-read set hash keyed by reference seq IDs
 def getSets(blastn):
+    """
+    Generate a hash of reference-to-read set from a blastn output file.
+
+    Parameters
+    ----------
+    blastn : str
+        Path to the blastn output file.
+
+    Returns
+    -------
+    dict
+        A dictionary where keys are reference sequence IDs and values are
+        sets of read IDs that hit the reference sequence.
+    """
     f = open(blastn, "r")
     Hash = {}
     while 1:
@@ -27,6 +41,21 @@ def getSets(blastn):
 
 # Simply dereplicate the list of sets of read IDs
 def getUniqSets(Hash):
+    """
+    Dereplicate the list of sets of read IDs, ensuring uniqueness.
+
+    Parameters
+    ----------
+    Hash : dict
+        A dictionary where keys are reference sequence IDs and values are
+        sets of read IDs that hit the reference sequence.
+
+    Returns
+    -------
+    dict
+        A dictionary where keys are unique reference sequence IDs and values
+        are unique sets of read IDs.
+    """
     uniqSets = []
     dereped = {}
     for sID, qSet in Hash.items():
@@ -37,6 +66,20 @@ def getUniqSets(Hash):
 
 
 def getDerepHitSets(blastn):
+    """
+    Dereplicate a blastn output file by reference-to-read set to obtain
+    a list of unique reference sequence IDs.
+
+    Parameters
+    ----------
+    blastn : str
+        Path to the blastn output file.
+
+    Returns
+    -------
+    list
+        A list of unique reference sequence IDs.
+    """
     sets = getSets(blastn)
     uniqSets = getUniqSets(sets)
     return uniqSets.keys()

@@ -7,6 +7,19 @@
 
 
 def derep_refset(refset):
+    """
+    Dereplicate reference hits by their matching read id set.
+
+    Parameters
+    ----------
+    refset : list of Refseq objects
+        List of Refseq objects
+
+    Returns
+    -------
+    list of Refseq objects
+        List of Refseq objects that are dereplicated by their matching read id set
+    """
     uniq_read_sets = []
     dereped = []
     for ref in refset:
@@ -57,6 +70,15 @@ def converge_ref(refset):
 
 # recursively remove references to which there are no uniquely mapped reads
 def remove_nonuniq_refs(ref2read_dict):
+    """
+    Recursively remove references to which there are no uniquely mapped reads.
+
+    Parameters:
+    ref2read_dict (dict): Dictionary of reference IDs to their associated read IDs
+
+    Returns:
+    dict: Updated dictionary of reference IDs to their associated read IDs
+    """
     read2ref_dict = {}
     for ref_id, read_ids in ref2read_dict.items():
         readIDs = ref2read_dict[ref_id]
@@ -76,6 +98,30 @@ def remove_nonuniq_refs(ref2read_dict):
 
 # load filtered and dereplicated blastn results into a dictionary
 def get_blastn_hits(blastn, uc_filename):
+    """
+    Load filtered and dereplicated BLASTN results into a dictionary.
+
+    This function parses a BLASTN output file and a UC filename to
+    generate a dictionary containing hit information and a set of ASV
+    IDs in reverse-complement orientation.
+
+    Parameters
+    ----------
+    blastn : str
+        Path to the BLASTN output file.
+    uc_filename : str
+        Path to the UC file containing sequence clustering information.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - hit_info (dict): A dictionary where keys are subject IDs (sid) 
+          and values are dictionaries mapping ASV IDs to lists containing 
+          start and end coordinates of hits.
+        - rc_set (set): A set of ASV IDs that are in reverse-complement 
+          orientation with respect to the reference sequences.
+    """
     read2rep = get_id_dict(uc_filename)
     rep2asv = invert_dict(read2rep)
     hit_info = {}  # to hold blast info, i.e. coordinates
@@ -112,6 +158,23 @@ def get_blastn_hits(blastn, uc_filename):
 
 # generate a map of unique asvid to asvid
 def get_id_dict(uc_filename):
+    """
+    Generate a mapping of sequence IDs to their representative IDs from a UC file.
+
+    This function reads a UC file and creates a dictionary where each key is a 
+    sequence ID, and the value is its representative ID unless the representative 
+    ID is '*', in which case the sequence ID maps to itself.
+
+    Parameters
+    ----------
+    uc_filename : str
+        Path to the UC file containing sequence clustering information.
+
+    Returns
+    -------
+    dict
+        A dictionary mapping sequence IDs to their representative IDs.
+    """
     id_dict = {}
     f = open(uc_filename, "r")
     while 1:
@@ -131,6 +194,24 @@ def get_id_dict(uc_filename):
 
 
 def remove_blastn_subsets(Hash):
+    """
+    Remove blastn subsets from the given hash.
+
+    Parameters
+    ----------
+    Hash : dict
+        A dictionary where each key is a reference ID and the value is a dictionary
+        mapping ASV IDs to lists of coordinates.
+
+    Returns
+    -------
+    dict
+        A dictionary that is a subset of the input dictionary, where each key is
+        a reference ID and the value is a dictionary mapping ASV IDs to lists of
+        coordinates, but only including references that are not subsets of other
+        references.
+
+    """
     ref_ids = Hash.keys()
     ref_IDs = ref_ids[:]
     for ref_id1 in ref_ids:
@@ -144,6 +225,24 @@ def remove_blastn_subsets(Hash):
 
 
 def invert_dict(id_dict):  # switch keys and values
+    """
+    Invert a dictionary by switching keys and values.
+
+    This function takes a dictionary where each key maps to a value and
+    returns a new dictionary where each value maps to a list of keys that
+    originally had that value.
+
+    Parameters
+    ----------
+    id_dict : dict
+        The dictionary to be inverted, where keys are mapped to values.
+
+    Returns
+    -------
+    dict
+        A new dictionary where each original value is a key, and the value
+        is a list of keys from the original dictionary that mapped to it.
+    """
     id_dict_inv = {}
     for key, value in id_dict.items():
         if not value in id_dict_inv:
@@ -154,6 +253,25 @@ def invert_dict(id_dict):  # switch keys and values
 
 # instantiate objects for template sequences
 def initiate_refset(hits_info_dict):
+    """
+    Instantiate objects for template sequences.
+
+    Take a dictionary of hits information and instantiate a set of Refseq objects
+    representing the template sequences. The dictionary should have reference IDs
+    as keys and dictionaries as values, where the inner dictionaries have ASV IDs
+    as keys and lists of coordinates as values.
+
+    Parameters
+    ----------
+    hits_info_dict : dict
+        A dictionary of hits information where each key is a reference ID and
+        the value is a dictionary mapping ASV IDs to lists of coordinates.
+
+    Returns
+    -------
+    tuple
+        A tuple containing a list of Refseq objects and a list of ASV IDs.
+    """
     from Refseq import Refseq
 
     refset = []

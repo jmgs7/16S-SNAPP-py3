@@ -19,6 +19,26 @@ exec("import pandas as pd", namespace)
 
 # to prepare and minimize matrix with constants and variables
 def minimize_var(df, Sums):
+    """
+    Minimize a variable within a DataFrame by optimizing the distribution of
+    read counts across references.
+
+    This function takes a DataFrame `df` of read counts and a list `Sums`
+    representing the target sums for each column. It identifies the column
+    to be minimized and uses optimization to adjust the read counts
+    while adhering to constraints and bounds.
+
+    Parameters:
+    df (pandas.DataFrame): A DataFrame containing read counts with rows as
+                           references and columns as samples.
+    Sums (list): A list representing the target sums for each column in `df`.
+                 Entries with value -1 indicate columns not to be minimized.
+
+    Returns:
+    pandas.DataFrame: A DataFrame with minimized values, maintaining the
+                      original structure but with optimized read count
+                      allocation.
+    """
     rowNames = df.index.values
     columnNames = df.columns.values
     Array = pd.DataFrame(df).to_numpy()

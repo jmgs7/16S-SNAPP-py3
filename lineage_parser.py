@@ -10,6 +10,18 @@ import os
 
 
 def get_lineages(tax_filename, CONF):
+    """
+    Parse the classifier results into a hash of counts keyed by lineage name.
+
+    Parameters:
+    tax_filename (str): The path to the file containing taxonomic assignments.
+    CONF (float): The confidence threshold for accepting taxonomic assignments.
+
+    Returns:
+    dict: A dictionary mapping sequence IDs to their taxonomic lineages.
+          Sequence IDs that cannot be classified to the domain level are marked as "Unclassified".
+    """
+    
     Hash = {}
     lines = open(tax_filename.strip(), "r").readlines()
     for row in lines:
@@ -36,6 +48,16 @@ def get_lineages(tax_filename, CONF):
 
 
 def get_best_tax(ref_tax, read_taxs):  # choose the better between reftax and readtax
+    """
+    Choose the better between reftax and readtax based on the resolution of taxonomic lineage.
+
+    Parameters:
+    ref_tax (str): The taxonomic lineage of the reference sequence.
+    read_taxs (list): A list of taxonomic lineages of the associated reads.
+
+    Returns:
+    str: The most resolved lineage between the reference and associated reads.
+    """
     taxs = {}
     for tax in read_taxs:
         level = tax.count(";")
@@ -55,6 +77,18 @@ def get_best_tax(ref_tax, read_taxs):  # choose the better between reftax and re
 def add_lineages(
     wd, sample_id, tax_dict, refset
 ):  # refset pass through to add lineage information
+    """
+    Add the taxonomic lineage of the reference sequences to the Refseq objects.
+
+    Parameters:
+    wd (str): The working directory containing the taxonomic assignment files.
+    sample_id (str): The sample ID associated with the taxonomic assignments.
+    tax_dict (dict): A dictionary mapping sequence IDs to their taxonomic lineages.
+    refset (dict): The dictionary of Refseq objects.
+
+    Returns:
+    dict: The updated dictionary of Refseq objects with added taxonomic lineages.
+    """
     ref_tax_file = os.path.join(wd, sample_id + ".cls")
     ref_tax_hash = get_lineages(ref_tax_file, 0.7)
     for ref_id in refset.keys():

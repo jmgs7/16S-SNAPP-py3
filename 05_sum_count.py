@@ -8,6 +8,23 @@ import json
 
 
 def get_lineages(tax_filename, CONF):
+    """
+    Parse taxonomic assignments from a file and return a mapping of sequence IDs to their corresponding lineages.
+
+    This function reads a tab-separated file containing taxonomic information for sequences.
+    It processes each line to extract the sequence ID and its associated taxonomic lineage,
+    filtering based on a confidence threshold. The lineage is constructed as a semicolon-separated
+    string of taxonomic ranks, prefixed by their rank abbreviation, and is stored in a dictionary
+    keyed by the sequence ID.
+
+    Parameters:
+    tax_filename (str): The path to the file containing taxonomic assignments.
+    CONF (float): The confidence threshold for accepting taxonomic assignments.
+
+    Returns:
+    dict: A dictionary mapping sequence IDs to their taxonomic lineages.
+          Sequence IDs that cannot be classified to the domain level are marked as "Unclassified".
+    """
     Hash = {}
     lines = open(tax_filename.strip(), "r").readlines()
     for row in lines:
@@ -35,6 +52,16 @@ def get_lineages(tax_filename, CONF):
 
 
 def combine_consensus(f, sample_name):
+    """
+    Combine consensus sequences from all samples and write them to a single file.
+
+    Parameters:
+    f (str): The path to the consensus file for this sample.
+    sample_name (str): The name of the sample being processed.
+
+    Returns:
+    int: A count of the number of sequences processed.
+    """
     global counter
     count_table[sample_name] = {}
     cons = open(f, "r").read().strip(">").split("\n>")
@@ -55,6 +82,17 @@ def combine_consensus(f, sample_name):
 
 
 def integer_size(name):
+    """
+    Take a string of format "ID;size=123" and return a tuple where the first element is the new string
+    with the size rounded up to the nearest integer and the second element is the integer size.
+
+    Parameters:
+    name (str): The string of format "ID;size=123" to be processed.
+
+    Returns:
+    tuple: A tuple containing the new string with the size rounded up to the nearest integer and
+           the integer size.
+    """
     ID, size = name.split(";size=")
     size = int(math.ceil(float(size)))
     newid = ID + ";size=" + str(size)

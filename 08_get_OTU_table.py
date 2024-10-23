@@ -7,6 +7,20 @@ import json
 
 
 def get_idmap(f):  # replace sequence ids with integers
+    """
+    Replace sequence ids with integers in a fasta file, return a dictionary
+    mapping old ids to new ids.
+
+    Parameters
+    ----------
+    f : str
+        The name of the fasta file
+
+    Returns
+    -------
+    Map : dict
+        A dictionary mapping old ids to new ids
+    """
     Map = {}
     counter = 0
     for line in open(f, "r").readlines():

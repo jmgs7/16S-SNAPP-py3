@@ -9,6 +9,19 @@ from cigar import Cigar
 
 
 def get_pct_id(cigar_tuple):
+    """
+    Calculate the percentage of identity in a cigar string.
+
+    Parameters
+    ----------
+    cigar_tuple : tuple
+        A tuple of (count, type) pairs representing the cigar string.
+
+    Returns
+    -------
+    float
+        The percentage of identity in the cigar string.
+    """
     m = 0  # matches
     total = 0
     for seg in cigar_tuple:
@@ -24,6 +37,22 @@ def get_pct_id(cigar_tuple):
 
 
 def get_dist_dict(f):  # generate clusters by centroid approach
+    """
+    Generate clusters by centroid approach using a sam pairwise alignment file.
+
+    Parameters
+    ----------
+    f : str
+        The sam pairwise alignment file.
+
+    Returns
+    -------
+    clusters : dict
+        A dictionary of clusters. The keys are the centroid IDs.
+        The values are lists of hit IDs.
+    order : list
+        A list of centroid IDs in the order of clustering.
+    """
     clusters = {}  # dict of clusters
     covered = set([])  # previously clustered hit IDs
     centroids = set([])  # set of centroid IDs

@@ -12,6 +12,21 @@ import sys
 
 # extract ASV sequences to a fasta file and replace the sequence strings with IDs
 def split_asv_count(tbl, prefix):
+    """
+    Extracts ASV sequences from an OTU table and converts them to FASTA format.
+
+    This function reads an input CSV file (OTU table) and processes each line to
+    generate ASV sequence IDs. It outputs three files: a CSV file with ASV counts,
+    a FASTA file with single-end sequences, and a FASTA file with paired-end sequences.
+
+    Parameters:
+    tbl (str): The file path to the input OTU table in CSV format.
+    prefix (str): The prefix for the output files. The output files will be named
+                  with this prefix followed by '_count.csv', '_seq.fasta', and '_PE.fasta'.
+
+    Raises:
+    SystemExit: If an error occurs in processing the sequences.
+    """
     f = open(tbl, "r")
     tblout = open(prefix + "_count.csv", "w")
     single = open(prefix + "_seq.fasta", "w")
