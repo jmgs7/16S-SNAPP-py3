@@ -238,7 +238,7 @@ def combine_lineage_count(sample_id, refset, unmapped_list):
             k1_ID = K1_dict[asvID]
         except KeyError:
             # this read will not be included in the final tables because it is
-            # beyond the seqmatch cutoff
+            # beyond the seqmatch cutoff (SAB < 0.4, indicating very close neighbours).
 
             continue
         # Assign count and lineage of asvs to reference IDs.
@@ -247,13 +247,11 @@ def combine_lineage_count(sample_id, refset, unmapped_list):
             feature_counts_dict[k1_ID] = count
             feature_taxa_dict[k1_ID] = lineage
         else:  # If the refseq is already in the dictionary, check if the lineage is better.
-            if lineage.count(";") > feature_taxa_dict[k1_ID].count(
-                ","
-            ):  # Pick the better taxonomic assignment (the lower the level the most ; or , are in the taxonomic lineage string).
+            # Pick the better taxonomic assignment (the lower the level the most ; or , are in the taxonomic lineage string).
+            if lineage.count(";") > feature_taxa_dict[k1_ID].count(","):
                 feature_counts_dict[k1_ID] += count
-                feature_taxa_dict[k1_ID] = (
-                    lineage  # replace with this better taxonomic asssignment
-                )
+                # replace with this better taxonomic asssignment
+                feature_taxa_dict[k1_ID] = lineage
             else:
                 feature_counts_dict[k1_ID] += count
         if not lineage in Hash:
