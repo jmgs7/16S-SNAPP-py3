@@ -30,11 +30,26 @@ export log=${runlog}.${current_time}
 
 [ ! -d "$WD" ] && echo "Directory $WD does not exist, please create one..." && exit
 
+
+##Make a directory for QC.
+mkdir -p ${INPUTDIR}/QC/multiqc
+
 ##Make a directory for primer-trimmed sequence files
 mkdir ${WD}/trimmed
 mkdir RESDIR
 export RESDIR=$(readlink -f $PWD/RESDIR)
 cd ${WD}
+
+
+##Run QC
+echo -e "Running QC...\n    Starts: $(date)" >> $log
+start=$(date +%s.%N)
+fastqc -t ${THREADS} -o ${INPUTDIR}/QC ${INPUTDIR}/*.fastq.gz
+multiqc -o ${INPUTDIR}/QC/multiqc -f ${INPUTDIR}/QC 
+echo "    Ends: $(date)">>$log
+end=$(date +%s.%N)
+runtime=$(python -c "print(${end} - ${start})")
+echo "    QC Runtime: $runtime sec" >> $log
 
 ##Match and trim primers from PE reads
 echo -e "Matching/trimming primers...\n    Starts: $(date)" >> $log
@@ -160,7 +175,7 @@ echo "\n" >> $log
 ##Parse the outputs in order to obtain a more familiar output compatible with phyloseq.
 echo -e "\nParsing outputs...\n    Starts: $(date)">>$log
 start=$(date +%s.%N)
-${SCRIPTS}/04a_ouput_parser.py \
+${SCRIPTS}/04a_output_parser.py \
         ${RESDIR}/feature-table.tsv \
         ${RESDIR}/taxonomy-table.tsv \
         ${WD}/templates.fasta
