@@ -220,7 +220,7 @@ def build_tree(
     aligned = os.path.join(WD, "templates_mafft.fasta")
     tree = os.path.join(RESDIR, "templates_mafft.tree")
     os.system(
-        "mafft --quiet --thread 4 FASTA > ALIGNED".replace(
+        "mafft --quiet --thread $THREADS FASTA > ALIGNED".replace(
             "FASTA", seqfile_name
         ).replace("ALIGNED", aligned)
     )

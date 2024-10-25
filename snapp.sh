@@ -155,6 +155,23 @@ echo "    Converging Runtime: $runtime sec" >> $log
 echo "\n" >> $log
 
 
+#### ADDITION ####
+
+##Parse the outputs in order to obtain a more familiar output compatible with phyloseq.
+echo -e "\nParsing outputs...\n    Starts: $(date)">>$log
+start=$(date +%s.%N)
+${SCRIPTS}/04a_ouput_parser.py \
+        ${RESDIR}/feature-table.tsv \
+        ${RESDIR}/taxonomy-table.tsv \
+        ${WD}/templates.fasta
+
+end=$(date +%s.%N)
+runtime=$(python -c "print(${end} - ${start})")
+echo "    Parsing Runtime: $runtime sec" >> $log
+
+###################
+
+
 ########## NEW EXPERIMENTAL PIPELINE ##########
 
 ##Cluster all sequences in consensus files using kmer in R
