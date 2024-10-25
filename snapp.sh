@@ -44,8 +44,8 @@ cd ${WD}
 ##Run QC
 echo -e "Running QC...\n    Starts: $(date)" >> $log
 start=$(date +%s.%N)
-fastqc -t ${THREADS} -o ${INPUTDIR}/QC ${INPUTDIR}/*.fastq.gz
-multiqc -o ${INPUTDIR}/QC/multiqc -f ${INPUTDIR}/QC 
+fastqc -t ${THREADS} -q -o ${INPUTDIR}/QC ${INPUTDIR}/*.fastq.gz
+multiqc -q -o ${INPUTDIR}/QC/multiqc -f ${INPUTDIR}/QC 
 echo "    Ends: $(date)">>$log
 end=$(date +%s.%N)
 runtime=$(python -c "print(${end} - ${start})")
