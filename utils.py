@@ -110,7 +110,7 @@ def update_refseq(
     # Iterate all refseq objects for multiple tasks
     for rec in recs:
         lines = rec.split("\n")
-        if lines:  # handle empty samples
+        if lines[0]:  # handle seqs with no ID and empty samples.
             ID = lines[0].split()[0]
             seq = "".join(lines[1:]).replace(" ", "")
             refset[ID].addSeq(seq)
