@@ -31,9 +31,6 @@ export log=${runlog}.${current_time}
 [ ! -d "$WD" ] && echo "Directory $WD does not exist, please create one..." && exit
 
 
-##Make a directory for QC.
-mkdir -p ${INPUTDIR}/QC/multiqc
-
 ##Make a directory for primer-trimmed sequence files
 mkdir ${WD}/trimmed
 mkdir RESDIR
@@ -41,9 +38,11 @@ export RESDIR=$(readlink -f $PWD/RESDIR)
 cd ${WD}
 
 
-##Run QC
-echo -e "Running QC...\n    Starts: $(date)" >> $log
+##Run QC on raw fastqs
+echo -e "Running QC pre-processig...\n    Starts: $(date)" >> $log
 start=$(date +%s.%N)
+##Make a directory for QC.
+mkdir -p ${INPUTDIR}/QC/multiqc
 fastqc -t ${THREADS} -q -o ${INPUTDIR}/QC ${INPUTDIR}/*.fastq.gz
 multiqc -q -o ${INPUTDIR}/QC/multiqc -f ${INPUTDIR}/QC 
 echo "    Ends: $(date)">>$log
@@ -107,6 +106,18 @@ echo -e "\nDADA2 processing stats:" >> $log
 ${SCRIPTS}/01_run_dada2.R trimmed/ . ${QCLIB} ${THREADS} >> $log #run dada2 with R
 # cat "DADA2_summary.csv" | sed -e 's/"//g' >> $log
 ${SCRIPTS}/02_get_asv_files.py asv_seqNcount.csv asv
+
+##Run QC after fastq processing
+echo -e "Running QC post-processig...\n    Starts: $(date)" >> $log
+start=$(date +%s.%N)
+##Make a directory for QC.
+mkdir -p ${WD}/trimmed/filtered/QC/multiqc
+fastqc -t ${THREADS} -q -o ${WD}/trimmed/filtered/QC ${WD}/trimmed/filtered/*.fastq.gz
+multiqc -q -o  ${WD}/trimmed/filtered/QC/multiqc -f ${WD}/trimmed/filtered/QC
+echo "    Ends: $(date)">>$log
+end=$(date +%s.%N)
+runtime=$(python -c "print(${end} - ${start})")
+echo "    QC Runtime: $runtime sec" >> $log
 
 # Count the unique paris of ASVs from get_asv_files.py output
 echo -e "\n    Unique ASV pairs from DADA2: $(bc <<< "$(grep -c ">" \

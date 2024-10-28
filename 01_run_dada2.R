@@ -11,6 +11,7 @@ if (length(args) != 4){
 }
 
 suppressMessages(library(dada2))
+suppressMessages(library(decontam))
 path <- normalizePath(args[1]) #inputDir
 wd <- normalizePath(args[2]) #workdir
 QCLIB <- normalizePath(args[3]) #the path to qc_analysis.r (metagenomics-pipeline)
@@ -54,7 +55,16 @@ mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE, justConcaten
 #get asv sequence and count table and write to a tab-delimited file
 seqtab <- makeSequenceTable(mergers)
 seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=THREADS, verbose=TRUE)
-write.csv(t(seqtab.nochim), file=paste(wd, 'asv_seqNcount.csv', sep='/'))
+
+#Launch decontam.
+#You need to adjust the number of FALSES and TRUES and their order according to you sample distribution.
+vector_for_decontam <-  grepl("K_negativo", rownames(seqtab.nochim), ignore.case = TRUE) # TRUE is the negative control.
+contam_df <- isContaminant(seqtab.nochim, neg = vector_for_decontam)
+contam_asvs <- row.names(contam_df[contam_df$contaminant == TRUE, ])
+seqtab.nochim.nocontam <- seqtab.nochim[,!colnames(seqtab.nochim) %in% contam_asvs]
+
+#Write asv sequence and count table
+write.csv(t(seqtab.nochim.nocontam), file=paste(wd, 'asv_seqNcount.csv', sep='/'))
 
 #Get process stats and write to a tab-delimited file
 #getN <- function(x) sum(getUniques(x))
