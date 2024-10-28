@@ -5,6 +5,30 @@
 # Class of templates to be used for consensus sequences
 ## Ported to Python 3 on 20210106
 
+"""
+
+**Class Overview**
+
+The `Refseq` class represents a reference sequence and its associated reads, providing methods to add reads, calculate coverage, and assign taxonomic classifications.
+
+**Method Explanations**
+
+1. `__init__(self, ID)`: Initializes a `Refseq` object with an ID and empty attributes for sequence, reads, positions, and consensus.
+2. `addRead(self, read_info)`: Adds a single-end read to the reference sequence, updating the `reads` and `positions` attributes.
+3. `addPEread(self, ID, read_info_R1, read_info_R2)`: Adds a paired-end read to the reference sequence, updating the `reads` and `positions` attributes.
+4. `getReadIDs(self)`: Returns a set of all read IDs mapped to the reference sequence.
+5. `addSeq(self, seq)`: Sets the full-length sequence of the reference.
+6. `addRegs(self)`: Divides the reference sequence into regions of consecutive coverage, updating the `baseRegs` attribute.
+7. `addReadCounts(self, DF)`: Adds minimized read counts attributable to the reference sequence, updating the `count` and `baseFreq` attributes.
+8. `addAssign(self, tax)`: Assigns a taxonomic classification to the reference sequence.
+9. `getCountSum(self)`: Returns the total count of reads mapped to the reference sequence.
+10. `getMeanBaseCov(self)`: Returns the average coverage of mapped bases.
+11. `getAlignLen(self)`: Returns the total length of aligned regions.
+12. `getAlignPct(self)`: Returns the fraction of all aligned positions.
+13. `getProxy(self)`: Returns the proxy sequence formed by concatenating all mapped regions, separated by "NNNNNNN".
+
+"""
+
 from operator import itemgetter
 from itertools import groupby
 import numpy as np
