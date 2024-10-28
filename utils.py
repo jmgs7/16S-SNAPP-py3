@@ -110,11 +110,14 @@ def update_refseq(
     # Iterate all refseq objects for multiple tasks
     for rec in recs:
         lines = rec.split("\n")
-        ID = lines[0].split()[0]
-        seq = "".join(lines[1:]).replace(" ", "")
-        refset[ID].addSeq(seq)
-        refset[ID].addReadCounts(DF)
-        refset[ID].addRegs()
+        if lines:
+            ID = lines[0].split()[0]
+            seq = "".join(lines[1:]).replace(" ", "")
+            refset[ID].addSeq(seq)
+            refset[ID].addReadCounts(DF)
+            refset[ID].addRegs()
+        else:
+            continue
     return refset
 
 
