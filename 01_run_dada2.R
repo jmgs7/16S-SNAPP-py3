@@ -59,7 +59,7 @@ seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=THRE
 #Launch decontam.
 #You need to adjust the number of FALSES and TRUES and their order according to you sample distribution.
 vector_for_decontam <-  grepl("K_negativo", rownames(seqtab.nochim), ignore.case = TRUE) # TRUE is the negative control.
-contam_df <- isContaminant(seqtab.nochim, neg = vector_for_decontam, threshold = 0.4) # Set a strict threshold.
+contam_df <- isContaminant(seqtab.nochim, neg = vector_for_decontam, threshold = 0.3) # Set a stricter threshold.
 contam_asvs <- row.names(contam_df[contam_df$contaminant == TRUE, ])
 seqtab.nochim.nocontam <- seqtab.nochim[,!colnames(seqtab.nochim) %in% contam_asvs]
 
