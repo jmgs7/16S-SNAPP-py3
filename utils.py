@@ -338,9 +338,12 @@ def read_seq(seqfile_name):
     recs = open(seqfile_name, "r").read().strip(">").split("\n>")
     for rec in recs:
         lines = rec.split("\n")
-        ID = lines[0].split()[0]
-        seq = "".join(lines[1:]).replace(" ", "")
-        seq_dict[ID] = seq
+        if lines[0]:
+            ID = lines[0].split()[0]
+            seq = "".join(lines[1:]).replace(" ", "")
+            seq_dict[ID] = seq
+        else:
+            continue
     return seq_dict
 
 
