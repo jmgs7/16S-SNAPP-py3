@@ -62,22 +62,26 @@ def combine_consensus(f, sample_name):
     Returns:
     int: A count of the number of sequences processed.
     """
+
     global counter
     count_table[sample_name] = {}
     cons = open(f, "r").read().strip(">").split("\n>")
     for con in cons:
         lines = con.split("\n")
-        ID = lines[0].strip()
-        seq = lines[1].strip()
-        SID, sample_name, size = ID.split(";")
-        sample_name = sample_name.split("=")[1]
-        newid, size = integer_size(ID)
-        # if ID.find('S00') != -1: #consensuse sequences
-        if not ID.find("asv") != -1:  # consensuse sequences
-            consensus_out.write(
-                ">" + newid + "\n" + seq + "\n"
-            )  # output the consensus sequences with integer size
-        count_table[sample_name][newid] = int(size)
+        if lines[0]:  # handle seqs with no ID and empty samples.
+            ID = lines[0].strip()
+            seq = lines[1].strip()
+            SID, sample_name, size = ID.split(";")
+            sample_name = sample_name.split("=")[1]
+            newid, size = integer_size(ID)
+            # if ID.find('S00') != -1: #consensuse sequences
+            if not ID.find("asv") != -1:  # consensus sequences
+                consensus_out.write(
+                    ">" + newid + "\n" + seq + "\n"
+                )  # output the consensus sequences with integer size
+            count_table[sample_name][newid] = int(size)
+        else:
+            continue
     return 1
 
 
