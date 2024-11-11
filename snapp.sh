@@ -74,6 +74,8 @@ for R1 in ${INPUTDIR}/*_R1_*fastq.gz; do
             $R1 $R2 \
             --max-n 0 \
             --minimum-length ${READLEN} \
+            --discard-untrimmed \
+            --match-read-wildcards \
             --cores $THREADS
 
     [[ ! -s trimmed/${basenameR1} ]] \

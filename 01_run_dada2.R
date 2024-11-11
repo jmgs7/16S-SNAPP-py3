@@ -56,6 +56,8 @@ mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE, justConcaten
 seqtab <- makeSequenceTable(mergers)
 seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=THREADS, verbose=TRUE)
 
+# seqtab.nochim.nocontam <- seqtab.nochim
+
 #Launch decontam.
 #You need to adjust the number of FALSES and TRUES and their order according to you sample distribution.
 vector_for_decontam <-  grepl("K_negativo", rownames(seqtab.nochim), ignore.case = TRUE) # TRUE is the negative control.
@@ -63,11 +65,10 @@ contam_df <- isContaminant(seqtab.nochim, neg = vector_for_decontam, threshold =
 contam_asvs <- row.names(contam_df[contam_df$contaminant == TRUE, ])
 seqtab.nochim.nocontam <- seqtab.nochim[,!colnames(seqtab.nochim) %in% contam_asvs]
 message(paste0(
-    "Total inferred ASVs:", ncol(seqtab.nochim)), 
-    "\nTotal contam ASVs:", length(contam_asvs), 
-    "\nTotal non-contam ASVs:", ncol(seqtab.nochim.nocontam), 
-    "(", round(ncol(seqtab.nochim.nocontam)/ncol(seqtab.nochim)*100, 2), "%)")
-# seqtab.nochim.nocontam <- seqtab.nochim
+    "Total inferred ASVs: ", ncol(seqtab.nochim)), 
+    "\nTotal contam ASVs: ", length(contam_asvs), 
+    "\nTotal non-contam ASVs: ", ncol(seqtab.nochim.nocontam), 
+    " (", round(ncol(seqtab.nochim.nocontam)/ncol(seqtab.nochim)*100, 2), "%)")
 
 #Write asv sequence and count table
 write.csv(t(seqtab.nochim.nocontam), file=paste(wd, 'asv_seqNcount.csv', sep='/'))
