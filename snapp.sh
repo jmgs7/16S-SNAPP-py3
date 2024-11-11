@@ -66,6 +66,14 @@ for R1 in ${INPUTDIR}/*_R1_*fastq.gz; do
     totalCount=$(bc <<<  $(zcat ${R1}|wc -l)/4)
 
     #PE option to trim primers off the reads
+    # -e 0.10 is the maximum error rate
+    # -g and -G are the forward and reverse primers
+    # -o and -p are the output files
+    # --untrimmed-output and --untrimmed-paired-output are the files for untrimmed reads
+    # --max-n 0 is to allow for Ns
+    # --minimum-length is the minimum read length
+    # --match-read-wildcards is to allow for wildcards in the primers
+    # --cores is the number of cores to use
     $CUTADAPT -e 0.10 -g file:$PRIMERS -G file:$PRIMERS \
             -o trimmed/${basenameR1} \
             -p trimmed/${basenameR2} \
@@ -74,7 +82,6 @@ for R1 in ${INPUTDIR}/*_R1_*fastq.gz; do
             $R1 $R2 \
             --max-n 0 \
             --minimum-length ${READLEN} \
-            --discard-untrimmed \
             --match-read-wildcards \
             --cores $THREADS
 
@@ -92,7 +99,7 @@ for R1 in ${INPUTDIR}/*_R1_*fastq.gz; do
     echo "$prefix trimmed: ${trimPCT}%" >> $log
 
 done
-rm *NotTrimmed.fastq
+rm *NotTrimmed.fastq # Comment for debugging
 echo "    Ends: $(date)">>$log
 end=$(date +%s.%N)
 runtime=$(python -c "print(${end} - ${start})")
