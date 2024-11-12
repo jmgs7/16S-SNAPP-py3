@@ -41,10 +41,7 @@ cd ${WD}
 ##Run QC on raw fastqs
 echo -e "Running QC pre-processig...\n    Starts: $(date)" >> $log
 start=$(date +%s.%N)
-##Make a directory for QC.
-mkdir -p ${INPUTDIR}/QC/multiqc
-fastqc -t ${THREADS} -q -o ${INPUTDIR}/QC ${INPUTDIR}/*.fastq.gz
-multiqc -q -o ${INPUTDIR}/QC/multiqc -f ${INPUTDIR}/QC 
+${SCRIPTS}/QC.py fastqc ${INPUTDIR}
 echo "    Ends: $(date)">>$log
 end=$(date +%s.%N)
 runtime=$(python -c "print(${end} - ${start})")
@@ -117,10 +114,7 @@ ${SCRIPTS}/02_get_asv_files.py asv_seqNcount.csv asv
 ##Run QC after fastq processing
 echo -e "Running QC post-processig...\n    Starts: $(date)" >> $log
 start=$(date +%s.%N)
-##Make a directory for QC.
-mkdir -p ${WD}/trimmed/filtered/QC/multiqc
-fastqc -t ${THREADS} -q -o ${WD}/trimmed/filtered/QC ${WD}/trimmed/filtered/*.fastq.gz
-multiqc -q -o  ${WD}/trimmed/filtered/QC/multiqc -f ${WD}/trimmed/filtered/QC
+${SCRIPTS}/QC.py ${WD}/trimmed/filtered/
 echo "    Ends: $(date)">>$log
 end=$(date +%s.%N)
 runtime=$(python -c "print(${end} - ${start})")
