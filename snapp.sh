@@ -72,7 +72,6 @@ for R1 in ${INPUTDIR}/*_R1_*fastq.gz; do
     # --untrimmed-output and --untrimmed-paired-output are the files for untrimmed reads
     # --max-n 0 is to allow for Ns
     # --minimum-length is the minimum read length
-    # --match-read-wildcards is to allow for wildcards in the primers
     # --cores is the number of cores to use
     $CUTADAPT -e 0.10 -g file:$PRIMERS -G file:$PRIMERS \
             -o trimmed/${basenameR1} \
@@ -82,7 +81,6 @@ for R1 in ${INPUTDIR}/*_R1_*fastq.gz; do
             $R1 $R2 \
             --max-n 0 \
             --minimum-length ${READLEN} \
-            --match-read-wildcards \
             --cores $THREADS
 
     [[ ! -s trimmed/${basenameR1} ]] \
