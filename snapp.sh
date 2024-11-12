@@ -70,7 +70,7 @@ for R1 in ${INPUTDIR}/*_R1_*fastq.gz; do
     # -g and -G are the forward and reverse primers
     # -o and -p are the output files
     # --untrimmed-output and --untrimmed-paired-output are the files for untrimmed reads
-    # --max-n 0 is to allow for Ns
+    # --max-n 0 is to not allow for Ns
     # --minimum-length is the minimum read length
     # --cores is the number of cores to use
     $CUTADAPT -e 0.10 -g file:$PRIMERS -G file:$PRIMERS \
