@@ -41,7 +41,7 @@ cd ${WD}
 ##Run QC on raw fastqs
 echo -e "Running QC pre-processig...\n    Starts: $(date)" >> $log
 start=$(date +%s.%N)
-${SCRIPTS}/QC.py fastqc ${INPUTDIR}
+${SCRIPTS}/QC.py ${INPUTDIR}
 echo "    Ends: $(date)">>$log
 end=$(date +%s.%N)
 runtime=$(python -c "print(${end} - ${start})")
