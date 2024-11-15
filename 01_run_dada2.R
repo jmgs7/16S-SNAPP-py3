@@ -71,7 +71,7 @@ message(paste0(
     " (", round(ncol(seqtab.nochim.nocontam)/ncol(seqtab.nochim)*100, 2), "%)")
 
 #Write asv sequence and count table
-write.csv(t(seqtab.nochim.nocontam), file=paste(wd, 'asv_seqNcount.csv', sep='/'))
+write.csv(t(seqtab.nochim.nocontam), file=paste(wd, 'asv_seqNcount.csv', sep='\t'), quote = FALSE)
 
 #Get process stats and write to a tab-delimited file
 #getN <- function(x) sum(getUniques(x))
