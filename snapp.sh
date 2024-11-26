@@ -10,9 +10,9 @@
 
 START=$(date +%s.%N)
 
-if [ $# -ne 3 ]
+if [ $# -lt 3 ]
     then
-        echo 'snapp.sh config.txt inputdir workdir'
+        echo 'snapp.sh config.txt inputdir workdir sample_metadata(optional with empty string "")'
         exit
 fi
 set -e
@@ -23,6 +23,13 @@ source $1 #load config.txt
 echo `cat ${1}`
 INPUTDIR=$(readlink -f $2) # the absolute dir where the fastq.gz file are located
 export WD=$(readlink -f $3) #work folder
+
+#sample metadata
+METADATA=${4:-""} 
+if [ -n "$METADATA" ]; then
+    METADATA=$(readlink -f "$METADATA")
+fi 
+
 runlog='log'
 current_time=$(date "+%Y.%m.%d-%H.%M.%S")
 echo $current_time
@@ -107,7 +114,7 @@ start=$(date +%s.%N)
 printf '\n' >> $log
 echo -e "\nDADA2 processing stats:" >> $log
 #Prepare asv count tables and sequences in PEs, single formats
-${SCRIPTS}/01_run_dada2.R trimmed/ . ${QCLIB} ${SCRIPTS} ${DECONTAM_THRESHOLDS} ${DECONTAM_COLUMN} ${DECONTAM_NEGATIVE} ${THREADS} >> $log #run dada2 with R
+${SCRIPTS}/01_run_dada2.R trimmed/ . ${QCLIB} ${SCRIPTS} ${DECONTAM_THRESHOLDS} ${DECONTAM_COLUMN} ${DECONTAM_NEGATIVE} ${THREADS} ${METADATA}>> $log #run dada2 with R
 # cat "DADA2_summary.csv" | sed -e 's/"//g' >> $log
 ${SCRIPTS}/02_get_asv_files.py asv_seqNcount.csv asv
 

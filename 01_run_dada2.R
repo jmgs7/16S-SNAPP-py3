@@ -6,19 +6,29 @@
 #Supply the arguments from the command line
 
 args <- commandArgs(TRUE)
-if (length(args) != 8){
-    stop("Usage: run_dada2.R inputDir workdir QCLIB SCRIPTS DECONTAM_THRESHOLDS DECONTAM_COLUMN DECONTAM_NEGATIVE THREADS");
+if (length(args) < 8){
+    stop("Usage: run_dada2.R inputDir workdir QCLIB SCRIPTS THREADS DECONTAM_THRESHOLDS DECONTAM_COLUMN DECONTAM_NEGATIVE METADATA(optional)");
 }
 
 path <- normalizePath(args[1]) #inputDir
 wd <- normalizePath(args[2]) #workdir
 QCLIB <- normalizePath(args[3]) #the path to qc_analysis.r (metagenomics-pipeline)
 SCRIPTS <- normalizePath(args[4])
-DECONTAM_THRESHOLDS <-args[5]
-DECONTAM_COLUMN  <- args[7]
-DECONTAM_NEGATIVE <- args[6]
+DECONTAM_THRESHOLDS <- args[5]
+DECONTAM_COLUMN  <- args[6]
+DECONTAM_NEGATIVE <- args[7]
 THREADS <- as.numeric(args[8]) #threads to use in the pipeline
-metadata <- read.table(paste0(path, "/sample_metadata.tsv"), sep = "\t", header = TRUE, row.names = 1)
+METADATA <- args[9]
+
+if (DECONTAM_COLUMN != "False") {
+    if (!is.na(METADATA)) {
+        metadata <- read.table(normalizePath(args[9]), sep = "\t", header = TRUE, row.names = 1)
+    } else {
+        stop("You must provide a valid metadata file.")
+    }
+} else if (DECONTAM_COLUMN == "False" & DECONTAM_THRESHOLDS != "False") {
+    stop("You must provide a valid column name for decontamination.")
+}
 
 suppressMessages(library(dada2))
 suppressMessages(source(QCLIB))
@@ -61,9 +71,11 @@ mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE, justConcaten
 #get asv sequence and count table and write to a tab-delimited file
 seqtab <- makeSequenceTable(mergers)
 seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=THREADS, verbose=TRUE)
+#Write seqtab.nochim
+write.table(seqtab.nochim, file=paste(wd, 'seqtab_nochim.tsv', sep='/'), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
 
 # Decontamination.
-if (!is.na(DECONTAM_THRESHOLDS) & DECONTAM_THRESHOLDS != "default") {
+if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
     threshold_vector <- as.numeric(unlist(strsplit(DECONTAM_THRESHOLDS, ",")))
     seqtab.nochim.nocontam <- run_decontam_batches(seqtab.nochim, metadata, column_name=DECONTAM_COLUMN, neg_key=DECONTAM_NEGATIVE, threshold_vector=threshold_vector, threads=THREADS)
     decontam_stats(seqtab.nochim, seqtab.nochim.nocontam)
@@ -73,6 +85,9 @@ if (!is.na(DECONTAM_THRESHOLDS) & DECONTAM_THRESHOLDS != "default") {
 } else {
     message("No decontamination will be performed.")
     seqtab.nochim.nocontam <- seqtab.nochim
+    if (DECONTAM_COLUMN != "False") {
+        batch_list <- split_dataframe_by_metadata(seqtab.nochim, metadata, column_name=DECONTAM_COLUMN, ouput_dir=wd, threads=THREADS)
+    }
 }
 
 #Write asv sequence and count table
