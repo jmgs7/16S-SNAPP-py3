@@ -74,19 +74,32 @@ seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=THRE
 #Write seqtab.nochim
 write.table(seqtab.nochim, file=paste(wd, 'seqtab_nochim.tsv', sep='/'), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
 
-# Decontamination.
+# Decontamination
+output.dir <- file.path(wd, "decontam")
 if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
-    threshold_vector <- as.numeric(unlist(strsplit(DECONTAM_THRESHOLDS, ",")))
-    seqtab.nochim.nocontam <- run_decontam_batches(seqtab.nochim, metadata, column_name=DECONTAM_COLUMN, neg_key=DECONTAM_NEGATIVE, threshold_vector=threshold_vector, threads=THREADS)
-    decontam_stats(seqtab.nochim, seqtab.nochim.nocontam)
+
+    dir.create(output.dir, showWarnings = FALSE)
+
+    threshold.vector <- as.numeric(unlist(strsplit(DECONTAM_THRESHOLDS, ",")))
+
+    seqtab.nochim.nocontam <- runDecontamBatch(seqtab.nochim, metadata, column.name=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, threshold.vector=threshold.vector, output.dir=output.dir, threads=THREADS)
+
+    decontamStats(seqtab.nochim, seqtab.nochim.nocontam)
+
 } else if (DECONTAM_THRESHOLDS == "default") {
-    seqtab.nochim.nocontam <- run_decontam_batches(seqtab.nochim, metadata, column_name=DECONTAM_COLUMN, neg_key=DECONTAM_NEGATIVE, threads=THREADS)
-    decontam_stats(seqtab.nochim, seqtab.nochim.nocontam)
+
+    seqtab.nochim.nocontam <- runDecontamBatch(seqtab.nochim, metadata, column.name=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, output.dir=output.dir,threads=THREADS)
+
+    decontamStats(seqtab.nochim, seqtab.nochim.nocontam)
+
 } else {
+
     message("No decontamination will be performed.")
     seqtab.nochim.nocontam <- seqtab.nochim
+
     if (DECONTAM_COLUMN != "False") {
-        batch_list <- split_dataframe_by_metadata(seqtab.nochim, metadata, column_name=DECONTAM_COLUMN, ouput_dir=wd, threads=THREADS)
+        dir.create(output.dir, showWarnings = FALSE)
+        batch.list <- splitDataFrame(seqtab.nochim, metadata, column.name=DECONTAM_COLUMN, output.dir=output.dir, threads=THREADS)
     }
 }
 
