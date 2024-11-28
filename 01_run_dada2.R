@@ -88,6 +88,8 @@ if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
 
 } else if (DECONTAM_THRESHOLDS == "default") {
 
+    dir.create(output.dir, showWarnings = FALSE)
+
     seqtab.nochim.nocontam <- runDecontamBatch(seqtab.nochim, metadata, column.name=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, output.dir=output.dir,threads=THREADS)
 
     decontamStats(seqtab.nochim, seqtab.nochim.nocontam)
