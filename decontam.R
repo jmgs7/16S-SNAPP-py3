@@ -21,7 +21,7 @@ splitDataFrame <- function(main.df, metadata.df, column.name, output.dir=".", th
     # Ensure main.df is a dataframe and not a matrix.
     if (is.matrix(main.df)) {
         main.df <- as.data.frame(main.df)
-        message("Warning: main.df was input as a matrix. Converting to data.frame...")
+        message("Warning: main.df was inputted as a matrix. Converting to data.frame...")
     }
 
     # Extract the metadata column corresponding to rownames
