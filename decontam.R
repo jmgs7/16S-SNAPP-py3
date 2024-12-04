@@ -74,16 +74,28 @@ runDecontamBatch <- function(seqtab.nochim, metadata, column.name="extraction_ba
         threads <- detectCores()
     }
 
-    temp.df <- as.data.frame(rbindlist(mclapply(seq_along(batch.list), function(i) {
-        seqtab.nochim <- batch.list[[i]]
-        threshold <- threshold.vector[i]
-        temp.df <- runDecontam(seqtab.nochim, neg.key, threshold, paste0(output.dir, "/", "decontam_stats_", names(batch.list)[i], ".tsv"))
-        temp.df$id <- rownames(temp.df)
-        return(temp.df)
-    }, mc.cores = threads))) # It outputs a data table which does not accept rownames. We have to store the rownames in a columna and transform to dataframe.
+    temp.df <- as.data.frame(
+        rbindlist(
+            mclapply(
+                seq_along(batch.list), 
+                    function(i) {
+                        seqtab.nochim <- batch.list[[i]]
+                        threshold <- threshold.vector[i]
+                        temp.df <- runDecontam(seqtab.nochim, neg.key, threshold, paste0(output.dir, "/", "decontam_stats_", names(batch.list)[i], ".tsv"))
+                        temp.df$id <- rownames(temp.df)
+                        return(temp.df)
+                        }, 
+                    mc.cores = threads), # Number of cores for mcapply.
+            fill = TRUE) # rbindlist: Fill missing columns after decontamination with NAs to later substitute with 0.
+        ) # It outputs a data table which does not accept rownames. We have to store the rownames in a columna and transform to dataframe.
     
+    # Reset the rownames.
     rownames(temp.df) <- temp.df$id
-    seqtab.nochim.nocontam <- temp.df[, !colnames(temp.df) %in% c("id")]
+    temp.df <- temp.df[, !colnames(temp.df) %in% c("id")]
+
+    # Handle NAs and all-0 columns.
+    temp.df[is.na(temp.df)] <- 0 # Replace NAs with 0
+    seqtab.nochim.nocontam <- temp.df[, !(colSums(temp.df) == 0)] # Remove columns with all zeros
 
     return(seqtab.nochim.nocontam)
 }
