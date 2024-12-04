@@ -45,7 +45,7 @@ runDecontam <- function(seqtab.nochim, neg.key = "Knegativo", threshold=0.4, out
     suppressMessages(library(decontam))
 
     #You need to adjust the number of FALSES and TRUES and their order according to you sample distribution.
-    vector.decontam <-  grepl(neg.key, rownames(seqtab.nochim), ignore.case = TRUE) # TRUE is the negative control.
+    vector.decontam <- grepl(neg.key, rownames(seqtab.nochim), ignore.case = TRUE) # TRUE is the negative control.
     contam.df <- isContaminant(as.matrix(seqtab.nochim), neg = vector.decontam, threshold=threshold) # Set a stricter threshold.
     contam_asvs <- row.names(contam.df[contam.df$contaminant == TRUE, ])
     seqtab.nochim.nocontam <- seqtab.nochim[,!colnames(seqtab.nochim) %in% contam_asvs]

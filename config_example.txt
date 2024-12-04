@@ -1,17 +1,32 @@
-#!/usr/sh
+#!/bin/bash
 
 ## tool paths
-CUTADAPT=/usr/local/bin/cutadapt
-VSEARCH=/usr/local/bin/vsearch
-export RDPHOME=/tools/RDPTools #the directory where classifier.jar lives
-export MAKEBLASTDB=/usr/local/bin/makeblastdb
-export BLASTN=/usr/local/bin/blastn
+CUTADAPT=~/anaconda3/envs/16S-SNAPP/bin/cutadapt
+VSEARCH=~/anaconda3/envs/16S-SNAPP/bin/vsearch
+export RDPHOME=~/anaconda3/envs/16S-SNAPP/bin
+
+# Because the classifier bin from the conda distribution only supports 1GB maximun heap size, memory overload is common. 
+# For custom RDP classifiers, we will use a git installation of RDPTools with the -Xmx8g optiom to set the maximun heap size to 8GB.
+export RDPHOME_CUSTOM=~/Software/RDPTools
+export MAKEBLASTDB=~/anaconda3/envs/16S-SNAPP/bin/makeblastdb
+export BLASTN=~/anaconda3/envs/16S-SNAPP/bin/blastn
 
 ## database paths
-export RDP_FULL_BLAST=/work/DB/rdp11_5
-export RDP_FULL_SEQ=/work/DB/rdp11_5.fasta
-#export RDP_CLASSIFIER=/work/DB/trained/rRNAClassifier.properties #path to custom trained RDP Classifier
+export RDP_FULL_BLAST=~/Data/Reference/16S_SNAPP_DB/rdp11_5
+export RDP_FULL_SEQ=~/Data/Reference/16S_SNAPP_DB/rdp11_5.fasta
+export RDP_CLASSIFIER=~/Data/Reference/16S_SNAPP_DB/trained_2.13_species/rRNAClassifier.properties #path to custom trained RDP Classifier
+
+## decontam settings
+export DECONTAM_THRESHOLDS="default" # Introduce the vector of decontam thresholds as a comma separated list (i.e.: "0.4,0.4,0.4"). Input False to skip the decontam step. Default is "default" which will use the default decontam threshold (0.4).
+#export DECONTAM_THRESHOLDS="default"
+export DECONTAM_COLUMN="batch" # Introduce the column name to identify the sample batches. Default is "extraction_batch". When DECONTAM_THRESHOLDS is False (skip decontam), if DECONTAM_COLUMN is not False, the dataframes will be split by DECONTAM_COLUMN and decontam will be skipped. To avoid this, sdt DECONTAM_COLUMN also as False.
+#export DECONTAM_COLUMN="extraction_batch"
+export DECONTAM_NEGATIVE="K_negativo" # Introduce the key word to identify negative extraction controls. Default is "Knegativo".
+#export DECONTAM_NEGATIVE="Knegativo"
 
 ## primers and other settings
-PRIMERS=/work/DB/Swift_16S_SNAP_primers.fasta #primer file formatted paired-end primer trimming
-export READLEN=130 #read length its primer is removed (before paired end merging)
+PRIMERS=~/Data/Reference/16S_SNAPP_DB/Swift_16S_SNAP_primers_v2.fasta #primer file formatted paired-end primer trimming
+export READLEN=130 #expected minimum read lenght (i.e.: single read length after primer is trimmed)
+export QCLIB=~/Pipelines/metagenomics/lib/qc_analysis.r #path to qc_analysis.r (from metagenomics-pipeline)
+#export THREADS=4 #number of threads to use for parallel processing
+export THREADS=$(nproc --all) #use maximun number of threads available
