@@ -101,7 +101,7 @@ if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
 
     if (DECONTAM_COLUMN != "False") {
         dir.create(output.dir, showWarnings = FALSE)
-        batch.list <- splitDataFrame(seqtab.nochim, metadata, column.name=DECONTAM_COLUMN, output.dir=output.dir, threads=THREADS)
+        runDecontamBatch(seqtab.nochim, metadata, column.name=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, output.dir=output.dir, threads=THREADS, del.contaminants=FALSE)
     }
 }
 

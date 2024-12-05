@@ -1,9 +1,19 @@
 #!/usr/bin/env Rscript
 ## Swift Biosciences 16S snapp workflow - Adapted by Bionformatics Service @ Genyo (Granada, Spain)
 ## Author (GitHub: jmgs7) 24102024
-splitDataFrame <- function(main.df, metadata.df, column.name, output.dir=".", threads=0) {
 
-    suppressMessages(library(parallel))
+loadLibrary <- function(lib) {
+    if (!require(lib, character.only = TRUE)) {
+        message(paste0("Package ", lib, " not found, trying to install..."))
+        install.packages(lib)
+    if (!require(lib, character.only = TRUE)) {
+        stop(paste0("Package ", lib, " not found."))
+        }
+    } 
+}
+
+splitDataFrame <- function(main.df, metadata.df, column.name, output.dir=".", threads=0) {
+    loadLibrary("parallel")
     
     if (threads == 0) {
         threads <- detectCores()
@@ -33,7 +43,7 @@ splitDataFrame <- function(main.df, metadata.df, column.name, output.dir=".", th
     if (output.dir != FALSE) {
         # Write each dataframe to a TSV file
         mclapply(names(split.list), function(name) {
-            filename <- paste0(output.dir, "/", "decontam_batch_", name, ".tsv")
+            filename <- paste0(output.dir, "/", "decontamBatch_", name, ".tsv")
             write.table(split.list[[name]], file = filename, sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
             }, mc.cores = threads)
     }
@@ -41,23 +51,42 @@ splitDataFrame <- function(main.df, metadata.df, column.name, output.dir=".", th
     return(split.list)
 }
 
-runDecontam <- function(seqtab.nochim, neg.key = "Knegativo", threshold=0.4, output.stats=FALSE) {
-    suppressMessages(library(decontam))
+plotDecontamHist <- function(contam.df, output.file, title = "Histogram of p values") {
+    loadLibrary("ggplot2")
+
+    ggplot(contam.df, aes(x = p)) +
+        geom_histogram(binwidth = 0.05, fill = "steelblue", color = "black") +
+        scale_x_continuous(breaks = seq(0, 1, by = 0.1), limits = c(0, 1)) +
+        labs(title = title,
+            x = "p statistic",
+            y = "Frequency (# of ASVs)") +
+        theme_classic()
+
+    ggsave(output.file, width = 8, height = 6, device = "pdf")
+
+}
+
+runDecontam <- function(seqtab.nochim, neg.key = "Knegativo", threshold=0.4, output.stats=FALSE, del.contaminants = TRUE) {
+    loadLibrary("decontam")
 
     #You need to adjust the number of FALSES and TRUES and their order according to you sample distribution.
     vector.decontam <- grepl(neg.key, rownames(seqtab.nochim), ignore.case = TRUE) # TRUE is the negative control.
     contam.df <- isContaminant(as.matrix(seqtab.nochim), neg = vector.decontam, threshold=threshold) # Set a stricter threshold.
     contam_asvs <- row.names(contam.df[contam.df$contaminant == TRUE, ])
-    seqtab.nochim.nocontam <- seqtab.nochim[,!colnames(seqtab.nochim) %in% contam_asvs]
 
     if (output.stats != FALSE) {
-        write.table(contam.df, file=output.stats, sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
+        write.table(contam.df, file = output.stats, sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
+        plotName = gsub("\\.\\w+", "", basename(output.stats))
+        plotDecontamHist(contam.df, paste0(plotName, "_plot.pdf"), title = plotName)
     }
 
-    return(seqtab.nochim.nocontam)
+    if (del.contaminants) {
+        seqtab.nochim.nocontam <- seqtab.nochim[,!colnames(seqtab.nochim) %in% contam_asvs]
+        return(seqtab.nochim.nocontam)
+    }
 }
 
-runDecontamBatch <- function(seqtab.nochim, metadata, column.name="extraction_batch", neg.key="Knegativo", threshold.vector=NULL, output.dir=".", threads=0) {
+runDecontamBatch <- function(seqtab.nochim, metadata, column.name="extraction_batch", neg.key="Knegativo", threshold.vector=NULL, output.dir=".", del.contaminants=TRUE, threads=0) {
 
     batch.list <- splitDataFrame(seqtab.nochim, metadata, column.name, output.dir, threads)
 
@@ -67,37 +96,54 @@ runDecontamBatch <- function(seqtab.nochim, metadata, column.name="extraction_ba
         stop("The length of the thresholds vector must match the number of dataframes in the list.")
     }
 
-    suppressMessages(library(parallel))
-    suppressMessages(library(data.table))
+    loadLibrary("parallel")
+    loadLibrary("data.table")
 
     if (threads == 0) {
         threads <- detectCores()
     }
 
-    temp.df <- as.data.frame(
-        rbindlist(
-            mclapply(
+
+    # Run decontam and deletes contam asvs or not in function of the del.contaminants argument.
+    if (del.contaminants) {
+
+        temp.df <- as.data.frame(
+            rbindlist(
+                mclapply(
+                    seq_along(batch.list), 
+                        function(i) {
+                            seqtab.nochim <- batch.list[[i]]
+                            threshold <- threshold.vector[i]
+                            temp.df <- runDecontam(seqtab.nochim, neg.key, threshold, paste0(output.dir, "/", "decontamBatch_", names(batch.list)[i], "_stats.tsv"), del.contaminants)
+                            temp.df$id <- rownames(temp.df)
+                            return(temp.df)
+                            }, 
+                        mc.cores = threads), # Number of cores for mcapply.
+                fill = TRUE) # rbindlist: Fill missing columns after decontamination with NAs to later substitute with 0.
+            ) # It outputs a data table which does not accept rownames. We have to store the rownames in a columna and transform to dataframe.
+
+        # Reset the rownames.
+        rownames(temp.df) <- temp.df$id
+        temp.df <- temp.df[, !colnames(temp.df) %in% c("id")]
+
+        # Handle NAs and all-0 columns.
+        temp.df[is.na(temp.df)] <- 0 # Replace NAs with 0
+        seqtab.nochim.nocontam <- temp.df[, !(colSums(temp.df) == 0)] # Remove columns with all zeros
+
+        return(seqtab.nochim.nocontam)
+
+    } else {
+
+        mclapply(
                 seq_along(batch.list), 
                     function(i) {
                         seqtab.nochim <- batch.list[[i]]
                         threshold <- threshold.vector[i]
-                        temp.df <- runDecontam(seqtab.nochim, neg.key, threshold, paste0(output.dir, "/", "decontam_stats_", names(batch.list)[i], ".tsv"))
-                        temp.df$id <- rownames(temp.df)
-                        return(temp.df)
+                        runDecontam(seqtab.nochim, neg.key, threshold, paste0(output.dir, "/", "decontamBatch_", names(batch.list)[i], "_stats.tsv"), del.contaminants)
                         }, 
-                    mc.cores = threads), # Number of cores for mcapply.
-            fill = TRUE) # rbindlist: Fill missing columns after decontamination with NAs to later substitute with 0.
-        ) # It outputs a data table which does not accept rownames. We have to store the rownames in a columna and transform to dataframe.
-    
-    # Reset the rownames.
-    rownames(temp.df) <- temp.df$id
-    temp.df <- temp.df[, !colnames(temp.df) %in% c("id")]
+            mc.cores = threads) # Number of cores for mcapply.
 
-    # Handle NAs and all-0 columns.
-    temp.df[is.na(temp.df)] <- 0 # Replace NAs with 0
-    seqtab.nochim.nocontam <- temp.df[, !(colSums(temp.df) == 0)] # Remove columns with all zeros
-
-    return(seqtab.nochim.nocontam)
+    }
 }
 
 decontamStats <- function(seqtab.nochim, seqtab.nochim.nocontam) {
