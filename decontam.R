@@ -51,7 +51,7 @@ splitDataFrame <- function(main.df, metadata.df, column.name, output.dir=".", th
     return(split.list)
 }
 
-plotDecontamHist <- function(contam.df, output.file, title = "Histogram of p values") {
+plotDecontamHist <- function(contam.df, output.file = "./decontam_hist.pdf", title = "Histogram of p values") {
     loadLibrary("ggplot2")
 
     ggplot(contam.df, aes(x = p)) +
