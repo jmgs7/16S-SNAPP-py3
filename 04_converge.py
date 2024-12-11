@@ -426,7 +426,9 @@ template_mapped_seqs_dict = {}  # template seqs for associated reads
 # Multi-processing by process pooling. Use caution when applying this option
 all_completed = []  # to collect abundance for each sample when it's completed
 with concurrent.futures.ProcessPoolExecutor(
-    max_workers=int(os.environ.get("THREADS"))
+    max_workers=round(
+        int(os.environ.get("THREADS")) / 2
+    )  # For security half of the cores are used, as it is memory-intensive
 ) as executor:
     results = [executor.submit(converge, sample) for sample in rDF.columns]
     for f in concurrent.futures.as_completed(results):
