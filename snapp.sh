@@ -34,13 +34,11 @@ runlog='log'
 current_time=$(date "+%Y.%m.%d-%H.%M.%S")
 echo $current_time
 export log=${runlog}.${current_time}
-
-[ ! -d "$WD" ] && echo "Directory $WD does not exist, please create one..." && exit
-
+echo -e "##### RUN LOG #####\n" > $log
 
 ##Make a directory for primer-trimmed sequence files
-mkdir ${WD}/trimmed
-mkdir RESDIR
+mkdir -p ${WD}/trimmed
+mkdir -p RESDIR
 export RESDIR=$(readlink -f $PWD/RESDIR)
 cd ${WD}
 
@@ -58,7 +56,7 @@ echo "    QC Runtime: $runtime sec" >> $log
 echo -e "Matching/trimming primers...\n    Starts: $(date)" >> $log
 start=$(date +%s.%N)
 trimStats='trimStats.txt'
-printf "SampleID\tStarting read count\tPrimer trimmed\n" >> ${trimStats}
+printf "SampleID\tStarting_read_count\tPrimer_trimmed\n" > ${trimStats}
 for R1 in ${INPUTDIR}/*_R1_*fastq.gz; do
     echo $PRIMERS
     R2=${R1/_R1_/_R2_} #the path to the read 2 file

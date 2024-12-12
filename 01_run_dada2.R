@@ -109,8 +109,12 @@ if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
 write.csv(t(seqtab.nochim.nocontam), file=paste(wd, 'asv_seqNcount.csv', sep='/'), quote = FALSE)
 
 #Get process stats and write to a tab-delimited file
+
 getN <- function(x) sum(getUniques(x))
 track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim), rowSums(seqtab.nochim.nocontam))
-colnames(track) <- c("Primer_trimmed", "Filtered", "Denoised_FW", "Denoised_RV", "Merged", "Non_chimera", "Non_contaminant")
+colnames(track) <- c("Input_dada2", "Filtered", "Denoised_FW", "Denoised_RV", "Merged", "Non_chimera", "Non_contaminant") # Input_dada2 counts should be the same asPrimer_trimmed column.
 rownames(track) <- sample.names
-write.table(track, file=paste(wd, 'DADA2_summary.csv', sep="/"), sep=" ", row.names = TRUE, col.names = NA) #save processing stats to a file
+
+trimStats <- read.table(paste(wd, 'trimStats.txt', sep='/'), header = TRUE, row.names = 1)
+track <- merge(trimStats, track, by = "row.names", all = TRUE)
+write.table(track, file=paste(wd, 'DADA2_summary.csv', sep="/"), sep="\t", row.names = TRUE, col.names = NA) #save processing stats to a file
