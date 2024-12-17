@@ -30,18 +30,17 @@ if [ -n "$METADATA" ]; then
     METADATA=$(readlink -f "$METADATA")
 fi 
 
-runlog='log'
-current_time=$(date "+%Y.%m.%d-%H.%M.%S")
-echo $current_time
-export log=${runlog}.${current_time}
-echo -e "##### RUN LOG #####\n" > $log
-
 ##Make a directory for primer-trimmed sequence files
 mkdir -p ${WD}/trimmed
 mkdir -p RESDIR
 export RESDIR=$(readlink -f $PWD/RESDIR)
 cd ${WD}
 
+runlog='log'
+current_time=$(date "+%Y.%m.%d-%H.%M.%S")
+echo $current_time
+export log=${runlog}.${current_time}
+echo -e "##### RUN LOG #####\n" > $log
 
 ##Run QC on raw fastqs
 echo -e "Running QC pre-processig...\n    Starts: $(date)" >> $log
