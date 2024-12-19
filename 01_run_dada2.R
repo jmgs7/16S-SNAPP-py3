@@ -6,8 +6,8 @@
 #Supply the arguments from the command line
 
 args <- commandArgs(TRUE)
-if (length(args) < 8){
-    stop("Usage: run_dada2.R inputDir workdir QCLIB SCRIPTS THREADS DECONTAM_THRESHOLDS DECONTAM_COLUMN DECONTAM_NEGATIVE METADATA(optional)");
+if (length(args) < 9){
+    stop("Usage: run_dada2.R inputDir workdir QCLIB SCRIPTS DECONTAM_THRESHOLDS DECONTAM_COLUMN DECONTAM_NEGATIVE DECONTAM_NEG_COLUMN THREADS METADATA(optional)");
 }
 
 path <- normalizePath(args[1]) #inputDir
@@ -17,17 +17,22 @@ SCRIPTS <- normalizePath(args[4])
 DECONTAM_THRESHOLDS <- args[5]
 DECONTAM_COLUMN  <- args[6]
 DECONTAM_NEGATIVE <- args[7]
-THREADS <- as.numeric(args[8]) #threads to use in the pipeline
-METADATA <- args[9]
+DECONTAM_NEG_COLUMN <- args[8]
+THREADS <- as.numeric(args[9]) #threads to use in the pipeline
+METADATA <- args[10]
 
 if (DECONTAM_COLUMN != "False") {
     if (!is.na(METADATA)) {
-        metadata <- read.table(normalizePath(args[9]), sep = "\t", header = TRUE, row.names = 1)
+        metadata <- read.table(normalizePath(args[10]), sep = "\t", header = TRUE, row.names = 1)
     } else {
         stop("You must provide a valid metadata file.")
     }
 } else if (DECONTAM_COLUMN == "False" & DECONTAM_THRESHOLDS != "False") {
     stop("You must provide a valid column name for decontamination.")
+}
+
+if (DECONTAM_NEG_COLUMN == "False") {
+    DECONTAM_NEG_COLUMN <- NULL
 }
 
 suppressMessages(library(dada2))
@@ -82,7 +87,7 @@ if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
 
     threshold.vector <- as.numeric(unlist(strsplit(DECONTAM_THRESHOLDS, ",")))
 
-    seqtab.nochim.nocontam <- runDecontamBatch(seqtab.nochim, metadata, column.name=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, threshold.vector=threshold.vector, output.dir=output.dir, threads=THREADS)
+    seqtab.nochim.nocontam <- runDecontamBatch(seqtab.nochim, metadata, batch.column=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, neg.column = DECONTAM_NEG_COLUMN, threshold.vector=threshold.vector, output.dir=output.dir, threads=THREADS)
 
     decontamStats(seqtab.nochim, seqtab.nochim.nocontam)
 
@@ -90,7 +95,7 @@ if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
 
     dir.create(output.dir, showWarnings = FALSE)
 
-    seqtab.nochim.nocontam <- runDecontamBatch(seqtab.nochim, metadata, column.name=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, output.dir=output.dir,threads=THREADS)
+    seqtab.nochim.nocontam <- runDecontamBatch(seqtab.nochim, metadata, batch.column=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, neg.column = DECONTAM_NEG_COLUMN, output.dir=output.dir,threads=THREADS)
 
     decontamStats(seqtab.nochim, seqtab.nochim.nocontam)
 
@@ -101,7 +106,7 @@ if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
 
     if (DECONTAM_COLUMN != "False") {
         dir.create(output.dir, showWarnings = FALSE)
-        runDecontamBatch(seqtab.nochim, metadata, column.name=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, output.dir=output.dir, threads=THREADS, del.contaminants=FALSE)
+        runDecontamBatch(seqtab.nochim, metadata, batch.column=DECONTAM_COLUMN, neg.key=DECONTAM_NEGATIVE, output.dir=output.dir, threads=THREADS, del.contaminants=FALSE)
     }
 }
 

@@ -12,16 +12,16 @@ loadLibrary <- function(lib) {
     } 
 }
 
-splitDataFrame <- function(main.df, metadata.df, column.name, output.dir=".", threads=0) {
+splitDataFrame <- function(main.df, metadata.df, batch.column, output.dir=".", threads=0) {
     loadLibrary("parallel")
     
     if (threads == 0) {
         threads <- detectCores()
     }
 
-    # Check if column.name exists in metadata.df
-    if (!column.name %in% colnames(metadata.df)) {
-        stop("The specified column.name does not exist in the metadata dataframe.")
+    # Check if batch.column exists in metadata.df
+    if (!batch.column %in% colnames(metadata.df)) {
+        stop("The specified batch.column does not exist in the metadata dataframe.")
         }
     # Ensure rownames of main.df match rownames in metadata.df
     if (!all(rownames(main.df) %in% rownames(metadata.df))) {
@@ -35,7 +35,7 @@ splitDataFrame <- function(main.df, metadata.df, column.name, output.dir=".", th
     }
 
     # Extract the metadata column corresponding to rownames
-    metadata_values <- metadata.df[rownames(main.df), column.name]
+    metadata_values <- metadata.df[rownames(main.df), batch.column]
 
     # Split the main dataframe by metadata column
     split.list <- split(main.df, metadata_values)
@@ -66,11 +66,22 @@ plotDecontamHist <- function(contam.df, output.file = "./decontam_hist.pdf", tit
 
 }
 
-runDecontam <- function(seqtab.nochim, neg.key = "Knegativo", threshold=0.4, output.stats=FALSE, del.contaminants = TRUE) {
+runDecontam <- function(seqtab.nochim, neg.key = "Knegativo", metadata = NULL, neg.column = NULL, threshold=0.4, output.stats=FALSE, del.contaminants = TRUE) {
     loadLibrary("decontam")
 
     #You need to adjust the number of FALSES and TRUES and their order according to you sample distribution.
-    vector.decontam <- grepl(neg.key, rownames(seqtab.nochim), ignore.case = TRUE) # TRUE is the negative control.
+    if (!is.null(metadata)) {
+        if (is.null(neg.column)) {
+            message("WARNING: If metadata is provided, neg.column must be specified.")
+            message(paste0("Trying to create decontam vector by detecting the neg.key (", neg.key, ") on sample names..."))
+            vector.decontam <- grepl(neg.key, rownames(seqtab.nochim), ignore.case = TRUE) # TRUE is the negative control.
+        } else {
+            vector.decontam <- metadata[[neg.column]] == neg.key
+        }
+    } else {
+        vector.decontam <- grepl(neg.key, rownames(seqtab.nochim), ignore.case = TRUE) # TRUE is the negative control.
+    }
+
     contam.df <- isContaminant(as.matrix(seqtab.nochim), neg = vector.decontam, threshold=threshold) # Set a stricter threshold.
     contam_asvs <- row.names(contam.df[contam.df$contaminant == TRUE, ])
 
@@ -86,14 +97,13 @@ runDecontam <- function(seqtab.nochim, neg.key = "Knegativo", threshold=0.4, out
     }
 }
 
-runDecontamBatch <- function(seqtab.nochim, metadata, column.name="extraction_batch", neg.key="Knegativo", threshold.vector=NULL, output.dir=".", del.contaminants=TRUE, threads=0) {
+runDecontamBatch <- function(seqtab.nochim, metadata, batch.column="extraction_batch", neg.key="Knegativo", neg.column = NULL, threshold.vector=NULL, output.dir=".", del.contaminants=TRUE, threads=0) {
 
-    batch.list <- splitDataFrame(seqtab.nochim, metadata, column.name, output.dir, threads)
-
+    batch.list <- splitDataFrame(seqtab.nochim, metadata, batch.column, output.dir, threads)
     if (is.null(threshold.vector)) {
         threshold.vector <- rep(0.4, length(batch.list))
     } else if (length(batch.list) != length(threshold.vector)) {
-        stop("The length of the thresholds vector must match the number of dataframes in the list.")
+        stop("The length of the thresholds vector must match the number of decontam batches.")
     }
 
     loadLibrary("parallel")
@@ -114,13 +124,13 @@ runDecontamBatch <- function(seqtab.nochim, metadata, column.name="extraction_ba
                         function(i) {
                             seqtab.nochim <- batch.list[[i]]
                             threshold <- threshold.vector[i]
-                            temp.df <- runDecontam(seqtab.nochim, neg.key, threshold, paste0(output.dir, "/", "decontamBatch_", names(batch.list)[i], "_stats.tsv"), del.contaminants)
+                            temp.df <- runDecontam(seqtab.nochim, neg.key, metadata, neg.column, threshold, paste0(output.dir, "/", "decontamBatch_", names(batch.list)[i], "_stats.tsv"), del.contaminants)
                             temp.df$id <- rownames(temp.df)
                             return(temp.df)
                             }, 
                         mc.cores = threads), # Number of cores for mcapply.
                 fill = TRUE) # rbindlist: Fill missing columns after decontamination with NAs to later substitute with 0.
-            ) # It outputs a data table which does not accept rownames. We have to store the rownames in a columna and transform to dataframe.
+            ) # It outputs a data table which does not accept rownames. We have to store the rownames in a column and transform to dataframe.
 
         # Reset the rownames.
         rownames(temp.df) <- temp.df$id
