@@ -63,6 +63,13 @@ message(paste0("Trunc parameters:", "\nFW: ", trunc_parameters$forwardReads, "\n
 
 # launch filterAndTrim
 out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(trunc_parameters$forwardReads, trunc_parameters$reverseReads), maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE, compress=TRUE, multithread=THREADS)
+rownames(out) <- sapply(strsplit(rownames(out), "_L001"), `[`, 1)
+
+#filter out samples with 0 reads after filtering
+filtSamples <- rownames(out)[out[,2] > 0]
+filtFs <- filtFs[filtSamples]
+filtRs <- filtRs[filtSamples]
+if (!is.na(METADATA)) {metadata <- metadata[filtSamples, ]}
 
 errF <- learnErrors(filtFs, multithread=TRUE)
 errR <- learnErrors(filtRs, multithread=TRUE)
@@ -116,10 +123,20 @@ write.csv(t(seqtab.nochim.nocontam), file=paste(wd, 'asv_seqNcount.csv', sep='/'
 #Get process stats and write to a tab-delimited file
 
 getN <- function(x) sum(getUniques(x))
-track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim), rowSums(seqtab.nochim.nocontam))
-colnames(track) <- c("Input_dada2", "Filtered", "Denoised_FW", "Denoised_RV", "Merged", "Non_chimera", "Non_contaminant") # Input_dada2 counts should be the same asPrimer_trimmed column.
+track <- list(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim), rowSums(seqtab.nochim.nocontam))
+# find the maximum length of all vectors in the list
+maxLength <- max(sapply(track, length))
+# use lapply to set the length of each vector to the maximum length
+track <- lapply(track, function(x) {
+    length(x) <- maxLength
+    x
+})
+# Create the matrix with all data.
+track <- do.call(cbind, track)
+# track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim), rowSums(seqtab.nochim.nocontam))
+colnames(track) <- c("Input_dada2", "Filtered", "Denoised_FW", "Denoised_RV", "Merged", "Non_chimera", "Non_contaminant") # Input_dada2 counts should be the same as Primer_trimmed column.
 rownames(track) <- sample.names
 
 trimStats <- read.table(paste(wd, 'trimStats.txt', sep='/'), header = TRUE, row.names = 1)
-track <- merge(trimStats, track, by = "row.names", all = TRUE)
-write.table(track, file=paste(wd, 'DADA2_summary.csv', sep="/"), sep="\t", row.names = TRUE, col.names = NA) #save processing stats to a file
+track <- merge(trimStats, track, by = 0, all = TRUE)
+write.table(track, file=paste(wd, 'DADA2_summary.csv', sep="/"), sep="\t", row.names = FALSE, col.names = TRUE) #save processing stats to a file
