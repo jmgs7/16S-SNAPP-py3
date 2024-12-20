@@ -238,7 +238,7 @@ os.rename(
 )
 os.rename(
     os.path.join(results_dir, "templates_mafft.fasta"),
-    os.path.join(results_dir, "sequences_alinged.fasta"),
+    os.path.join(results_dir, "sequences_aligned.fasta"),
 )
 
 
