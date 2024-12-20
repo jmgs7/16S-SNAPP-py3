@@ -226,6 +226,7 @@ fi
 
 ##Parse the outputs in order to obtain a more familiar output compatible with phyloseq.
 if [ ! -f ${RESDIR}/results/sequences_aligned.fasta ]; then
+
     echo -e "\nParsing outputs...\n    Starts: $(date)">>$log
     start=$(date +%s.%N)
     ${SCRIPTS}/04a_output_parser.py \
@@ -236,6 +237,7 @@ if [ ! -f ${RESDIR}/results/sequences_aligned.fasta ]; then
     end=$(date +%s.%N)
     runtime=$(python -c "print(${end} - ${start})")
     echo "    Parsing Runtime: $runtime sec" >> $log
+    
 fi
 
 ###################
