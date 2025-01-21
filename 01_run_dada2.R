@@ -71,20 +71,24 @@ filtFs <- filtFs[filtSamples]
 filtRs <- filtRs[filtSamples]
 if (!is.na(METADATA)) {metadata <- metadata[filtSamples, ]}
 
-errF <- learnErrors(filtFs, multithread=TRUE)
-errR <- learnErrors(filtRs, multithread=TRUE)
+if !(file.exists(paste(wd, 'seqtab_nochim.tsv', sep='/'))) {
+    
+    errF <- learnErrors(filtFs, multithread=TRUE)
+    errR <- learnErrors(filtRs, multithread=TRUE)
 
-#Sample inference with standard all sample pooling
-dadaFs <- dada(filtFs, err=errF, multithread=THREADS, pool=TRUE)
-dadaRs <- dada(filtRs, err=errR, multithread=THREADS, pool=TRUE)
+    #Sample inference with standard all sample pooling
+    dadaFs <- dada(filtFs, err=errF, multithread=THREADS, pool=TRUE)
+    dadaRs <- dada(filtRs, err=errR, multithread=THREADS, pool=TRUE)
 
-mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE, justConcatenate=TRUE)
+    mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE, justConcatenate=TRUE)
 
-#get asv sequence and count table and write to a tab-delimited file
-seqtab <- makeSequenceTable(mergers)
-seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=THREADS, verbose=TRUE)
-#Write seqtab.nochim
-write.table(seqtab.nochim, file=paste(wd, 'seqtab_nochim.tsv', sep='/'), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
+    #get asv sequence and count table and write to a tab-delimited file
+    seqtab <- makeSequenceTable(mergers)
+    seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=THREADS, verbose=TRUE)
+    #Write seqtab.nochim
+    write.table(seqtab.nochim, file=paste(wd, 'seqtab_nochim.tsv', sep='/'), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
+
+}
 
 # Decontamination
 output.dir <- file.path(wd, "decontam")
