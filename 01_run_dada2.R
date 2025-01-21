@@ -71,7 +71,7 @@ filtFs <- filtFs[filtSamples]
 filtRs <- filtRs[filtSamples]
 if (!is.na(METADATA)) {metadata <- metadata[filtSamples, ]}
 
-if !(file.exists(paste(wd, 'seqtab_nochim.tsv', sep='/'))) {
+if (!file.exists(paste(wd, 'seqtab_nochim.tsv', sep='/'))) {
     
     errF <- learnErrors(filtFs, multithread=TRUE)
     errR <- learnErrors(filtRs, multithread=TRUE)
