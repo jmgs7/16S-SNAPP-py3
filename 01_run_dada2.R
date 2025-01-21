@@ -88,6 +88,10 @@ if (!file.exists(paste(wd, 'seqtab_nochim.tsv', sep='/'))) {
     #Write seqtab.nochim
     write.table(seqtab.nochim, file=paste(wd, 'seqtab_nochim.tsv', sep='/'), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
 
+} else {
+
+    seqtab.nochim <- read.table(paste(wd, 'seqtab_nochim.tsv', sep='/'), sep = "\t", header = TRUE, row.names = 1)
+
 }
 
 # Decontamination
