@@ -282,6 +282,7 @@ fi
 
 echo "\n" >> $log
 echo "\n" >> $log
+END=$(date +%s.%N)
 runtime=$(python -c "print(${END} - ${START})")
 echo -e "\nWhole process completed in: $runtime sec">>$log
 
