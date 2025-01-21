@@ -69,7 +69,8 @@ rownames(out) <- sapply(strsplit(rownames(out), "_L001"), `[`, 1)
 filtSamples <- rownames(out)[out[,2] > 0]
 filtFs <- filtFs[filtSamples]
 filtRs <- filtRs[filtSamples]
-if (!is.na(METADATA)) {metadata <- metadata[filtSamples, ]}
+if (!is.na(METADATA) && DECONTAM_COLUMN != "False") {metadata <- metadata[filtSamples, ]}
+
 
 if (!file.exists(paste(wd, 'seqtab_nochim.tsv', sep='/'))) {
     
