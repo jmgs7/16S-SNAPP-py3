@@ -33,9 +33,13 @@ fi
 
 ##Make a directory for primer-trimmed sequence files
 mkdir -p ${WD}/trimmed
+##Create directory for check files
+mkdir -p ${WD}/check
+# Create directory for results
 mkdir -p RESDIR
 export RESDIR=$(readlink -f $PWD/RESDIR)
 cd ${WD}
+
 
 runlog='log'
 current_time=$(date "+%Y.%m.%d-%H.%M.%S")
@@ -199,7 +203,9 @@ fi
 
 
 ##Run blastn to obtain candidate templates.
-${SCRIPTS}/03_blastn_for_templates.sh
+if [ ! -f ${WD}/check/blastn_done.check ]; then
+    ${SCRIPTS}/03_blastn_for_templates.sh
+fi
 
 
 ##Determine the candiate reference sequenes, associate reads, allocate read counts,
@@ -259,7 +265,7 @@ if ${EXPERIMENTAL}; then
 
     mv all_cons_sorted.fasta all_cons.fasta
 
-    [ ! -d "tmp" ] && echo "create tmp diretory" && mkdir tmp
+    [ ! -d "tmp" ] && echo "create tmp diretory" && mkdir -p tmp
 
     #split the sorted fasta file into smaller ones for running minimap2 alignment
     ${SCRIPTS}/06_splitFasta.py all_cons.fasta 10000 tmp

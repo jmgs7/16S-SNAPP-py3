@@ -10,7 +10,7 @@
 ##Format a blastDB of asv for second blast in order to capture a more complete
 #set of matches
 
-if ! compgen -G "asv.*" > /dev/null; then
+if [ ! -f check/asv_db_done.check ]; then
 
     echo -e "\nMaking ASV blast DB...\n    Starts: $(date)">>$log
     start=$(date +%s.%N)
@@ -19,6 +19,7 @@ if ! compgen -G "asv.*" > /dev/null; then
         -in asv_uniq.fasta \
         -out asv
 
+    touch check/asv_db_done.check
     echo "    Ends: $(date)">>$log
     end=$(date +%s.%N)
     runtime=$(python -c "print(${end} - ${start})")
@@ -90,7 +91,7 @@ fi
 
 # Prepare SeqMatch DBecho -e "\nFormatting SeqMatch DB ...\n    Starts: $(date)">>$log
 # This is a clustering step.
-if ! compgen -G "blastn_2_derep.*" > /dev/null; then
+if [ ! -f check/blastn_2_derep_db_done.check ]; then
 
     start=$(date +%s.%N)
     [  -d seqmatch ] && echo "Directory seqmatch does exist, please delete..." && exit
@@ -153,6 +154,8 @@ if ! compgen -G "blastn_2_derep.*" > /dev/null; then
     runtime=$(python -c "print(${end} - ${start})")
     echo "    Making blastDB with dereplicated blastn_2 hits Runtime: $runtime sec" >> $log
 
+    touch check/blastn_2_derep_db_done.check
+
 fi
 
 
@@ -184,9 +187,11 @@ if [ ! -d asv_tmp ]; then
 
 
     #Split ASV file into multiple ones containing 500 sequences in each
-    mkdir asv_tmp
+    mkdir -p asv_tmp
     cat asv_PE.fasta | \
         (cd asv_tmp; split -a 8 -l 1000)
         #(cd asv_tmp; split -a 8 --additional-suffix=.fasta -l 1000)
 
 fi
+
+touch check/blastn_done.check
