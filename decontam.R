@@ -100,6 +100,7 @@ runDecontam <- function(seqtab.nochim, neg.key = "Knegativo", metadata = NULL, n
 runDecontamBatch <- function(seqtab.nochim, metadata, batch.column="extraction_batch", neg.key="Knegativo", neg.column = NULL, threshold.vector=NULL, output.dir=".", del.contaminants=TRUE, threads=0) {
 
     batch.list <- splitDataFrame(seqtab.nochim, metadata, batch.column, output.dir, threads)
+    metadata.list <- split(metadata, metadata[batch.column])
     if (is.null(threshold.vector)) {
         threshold.vector <- rep(0.4, length(batch.list))
     } else if (length(batch.list) != length(threshold.vector)) {
@@ -123,6 +124,7 @@ runDecontamBatch <- function(seqtab.nochim, metadata, batch.column="extraction_b
                     seq_along(batch.list), 
                         function(i) {
                             seqtab.nochim <- batch.list[[i]]
+                            metadata <- metadata.list[[i]]
                             threshold <- threshold.vector[i]
                             temp.df <- runDecontam(seqtab.nochim, neg.key, metadata, neg.column, threshold, paste0(output.dir, "/", "decontamBatch_", names(batch.list)[i], "_stats.tsv"), del.contaminants)
                             temp.df$id <- rownames(temp.df)
@@ -149,7 +151,7 @@ runDecontamBatch <- function(seqtab.nochim, metadata, batch.column="extraction_b
                     function(i) {
                         seqtab.nochim <- batch.list[[i]]
                         threshold <- threshold.vector[i]
-                        runDecontam(seqtab.nochim, neg.key, threshold, paste0(output.dir, "/", "decontamBatch_", names(batch.list)[i], "_stats.tsv"), del.contaminants)
+                        runDecontam(seqtab.nochim = seqtab.nochim, neg.key = neg.key, threshold = threshold, output.stats = paste0(output.dir, "/", "decontamBatch_", names(batch.list)[i], "_stats.tsv"), del.contaminants = del.contaminants)
                         }, 
             mc.cores = threads) # Number of cores for mcapply.
 
