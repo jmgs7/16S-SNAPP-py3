@@ -30,10 +30,10 @@ fi
 
 ##Blast the pre-formatted reference DB to find the hits above the cutoff
 # In this first blast step, we use the full reference database from RDP and filter the templates that have a high quality hit.
+start=$(date +%s.%N)
 if [ ! -f reflist.txt ]; then
 
     echo -e "\nRunning first blast...\n    Starts: $(date)">>$log
-    start=$(date +%s.%N)
     # Output format: 6 (BLAST standard output format), std (Standard output), include: qlen (query length), slen (subject length).
     $BLASTN \
         -num_threads $THREADS \
@@ -75,7 +75,7 @@ fi
 
 
 # Filters the fastq of the refset to only include the matched reference sequences (no filtering).
-if [ ! -d "seqmatch" ] || [ ! z "$( ls -A 'seqmatch' )" ]; then
+if [ ! -f refset.fasta ]; then
 
     ${RDPHOME}/ReadSeq \
         select-seqs reflist.txt \
@@ -91,7 +91,7 @@ fi
 
 # Prepare SeqMatch DBecho -e "\nFormatting SeqMatch DB ...\n    Starts: $(date)">>$log
 # This is a clustering step.
-if [ ! -f check/blastn_2_derep_db_done.check ]; then
+if [ ! -d seqmatch ]; then
 
     start=$(date +%s.%N)
     [  -d seqmatch ] && echo "Directory seqmatch does exist, please delete..." && exit
@@ -102,8 +102,13 @@ if [ ! -f check/blastn_2_derep_db_done.check ]; then
     runtime=$(python -c "print(${end} - ${start})")
     echo "    Completed training SeqMatch. Runtime: $runtime sec" >> $log
 
-    # Run blast using preliminary candidate templetes against asv DB in order to obtain a
-    #more complete set of template-asv matches
+fi
+
+
+# Run blast using preliminary candidate templetes against asv DB in order to obtain a
+#more complete set of template-asv matches
+if [ ! -f check/blastn_2_derep_db_done.check ]; then
+
     echo -e "\nRunning second blast...\n    Starts: $(date)">>$log
     start=$(date +%s.%N)
     $BLASTN \
@@ -160,7 +165,7 @@ fi
 
 
 # Third blastn
-if [ ! -f "blastn_3.txt" ]; then
+if [ ! -f blastn_3.txt ]; then
 
     echo -e "\nRunning blastn with all asv seqs against dereplicated blastn_2 hits ...\n    Starts: $(date)">>$log
     start=$(date +%s.%N)
@@ -181,7 +186,7 @@ if [ ! -f "blastn_3.txt" ]; then
 fi
 
 # Filter third blastn results.
-if [ ! -f "blastn_3_filtered.txt" ]; then
+if [ ! -f blastn_3_filtered.txt ]; then
 
     cat blastn_3.txt \
         | awk -F '\t' '{if($3 >= 97 && ($4/$13) > 0.97) print $0}' \
@@ -190,7 +195,7 @@ if [ ! -f "blastn_3_filtered.txt" ]; then
 fi
 
 
-if [ ! -f "reverse_complement_IDs.txt" ]; then
+if [ ! -f reverse_complement_IDs.txt ]; then
 
     #yank blastn results and create pickle dictionary file for each of all samples
     ${SCRIPTS}/pickle_blastn_by_sample.py asv_count.csv blastn_3_filtered.txt asv.uc
@@ -198,7 +203,7 @@ if [ ! -f "reverse_complement_IDs.txt" ]; then
 fi
 
 
-if [ ! -d "asv_tmp" ]; then
+if [ ! -d asv_tmp ]; then
 
     #Split ASV file into multiple ones containing 500 sequences in each
     mkdir -p asv_tmp
