@@ -160,7 +160,7 @@ fi
 
 
 # Third blastn
-if [ ! -d asv_tmp ]; then
+if [ ! -f "blastn_3_filtered.txt" ]; then
 
     echo -e "\nRunning blastn with all asv seqs against dereplicated blastn_2 hits ...\n    Starts: $(date)">>$log
     start=$(date +%s.%N)
@@ -182,9 +182,18 @@ if [ ! -d asv_tmp ]; then
         | awk -F '\t' '{if($3 >= 97 && ($4/$13) > 0.97) print $0}' \
         > blastn_3_filtered.txt
 
+fi
+
+
+if [ ! -f "reverse_complement_IDs.txt" ]; then
+
     #yank blastn results and create pickle dictionary file for each of all samples
     ${SCRIPTS}/pickle_blastn_by_sample.py asv_count.csv blastn_3_filtered.txt asv.uc
 
+fi
+
+
+if [ ! -d "asv_tmp" ]; then
 
     #Split ASV file into multiple ones containing 500 sequences in each
     mkdir -p asv_tmp
@@ -193,5 +202,6 @@ if [ ! -d asv_tmp ]; then
         #(cd asv_tmp; split -a 8 --additional-suffix=.fasta -l 1000)
 
 fi
+
 
 touch check/blastn_done.check
