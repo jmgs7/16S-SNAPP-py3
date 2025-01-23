@@ -75,7 +75,7 @@ fi
 
 
 # Filters the fastq of the refset to only include the matched reference sequences (no filtering).
-if [ ! -f seqmatch/train_*.trainee ]; then
+if [ ! -d "seqmatch" ] && [ ! z "$( ls -A 'seqmatch' )" ]; then
 
     ${RDPHOME}/ReadSeq \
         select-seqs reflist.txt \
