@@ -55,7 +55,7 @@ plotDecontamHist <- function(contam.df, output.file = "./decontam_hist.pdf", tit
     loadLibrary("ggplot2")
 
     ggplot(contam.df, aes(x = p)) +
-        geom_histogram(binwidth = 0.05, fill = "steelblue", color = "black") +
+        geom_histogram(bins = 20, fill = "steelblue", color = "black") +
         scale_x_continuous(breaks = seq(0, 1, by = 0.1), limits = c(0, 1)) +
         labs(title = title,
             x = "p statistic",
