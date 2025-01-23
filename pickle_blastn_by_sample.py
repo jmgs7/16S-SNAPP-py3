@@ -80,7 +80,7 @@ def pickle_blastn(countTable, blastn, ucFile):
     - Pickle files for each sample containing dereplicated hit information.
     - A text file 'reverse_complement_IDs.txt' containing reverse complement ASV IDs.
     """
-    os.system("mkdir pickle")
+    os.system("mkdir -p pickle")
     start_time = timeit.default_timer()
     rDF = pd.read_csv(countTable, sep=",", header=0, index_col=0)
     blastn_info, rc_list = blastn_parser.get_blastn_hits(blastn, ucFile)

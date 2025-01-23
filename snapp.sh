@@ -186,7 +186,7 @@ fi
 
 
 ##Data reduction, i.e. reduce the number of reads for downstream processing
-if [ ! -f ${WD}/asv_uniq.fasta ]; then
+if [ ! -f ${WD}/asv_uniq.fasta ] && [ ! -f ${WD}/asv.uc ]; then
     #Retain only unique sequences comparing both strands
     echo -e "\nDereplicating ASVs...\n    Starts: $(date)" >>$log
     start=$(date +%s.%N)
