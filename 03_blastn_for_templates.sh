@@ -160,7 +160,7 @@ fi
 
 
 # Third blastn
-if [ ! -f "blastn_3_filtered.txt" ]; then
+if [ ! -f "blastn_3.txt" ]; then
 
     echo -e "\nRunning blastn with all asv seqs against dereplicated blastn_2 hits ...\n    Starts: $(date)">>$log
     start=$(date +%s.%N)
@@ -177,6 +177,11 @@ if [ ! -f "blastn_3_filtered.txt" ]; then
     end=$(date +%s.%N)
     runtime=$(python -c "print(${end} - ${start})")
     echo "    Done blastn with all asv seqs against dereplicated blastn_2 hits Runtime: $runtime sec" >> $log
+
+fi
+
+# Filter third blastn results.
+if [ ! -f "blastn_3_filtered.txt" ]; then
 
     cat blastn_3.txt \
         | awk -F '\t' '{if($3 >= 97 && ($4/$13) > 0.97) print $0}' \
