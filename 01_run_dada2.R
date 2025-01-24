@@ -119,8 +119,6 @@ if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
     }
 }
 
-#Write asv sequence and count table
-write.csv(t(seqtab.nochim.nocontam), file=paste(wd, 'asv_seqNcount.csv', sep='/'), quote = FALSE)
 
 #Get process stats and write to a tab-delimited file
 
@@ -142,3 +140,7 @@ rownames(track) <- sample.names
 trimStats <- read.table(paste(wd, 'trimStats.txt', sep='/'), header = TRUE, row.names = 1)
 track <- merge(trimStats, track, by = 0, all = TRUE)
 write.table(track, file=paste(wd, 'DADA2_summary.csv', sep="/"), sep="\t", row.names = FALSE, col.names = TRUE) #save processing stats to a file
+
+
+#Write asv sequence and count table
+write.csv(t(seqtab.nochim.nocontam), file=paste(wd, 'asv_seqNcount.csv', sep='/'), quote = FALSE)
