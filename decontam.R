@@ -87,7 +87,7 @@ runDecontam <- function(seqtab.nochim, neg.key = "Knegativo", metadata = NULL, n
 
     if (output.stats != FALSE) {
         write.table(contam.df, file = output.stats, sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
-        plotName = gsub("\\.\\w+", "", output.stats)
+        plotName = gsub("\\.\\w+$", "", output.stats)
         plotDecontamHist(contam.df, paste0(plotName, "_plot.pdf"), title = basename(plotName))
     }
 
