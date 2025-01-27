@@ -123,7 +123,7 @@ if (DECONTAM_THRESHOLDS != "False" & DECONTAM_THRESHOLDS != "default") {
 #Get process stats and write to a tab-delimited file
 
 getN <- function(x) sum(getUniques(x))
-track <- list(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim), rowSums(seqtab.nochim.nocontam))
+track <- list(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim), rowSums(seqtab.nochim.nocontam)[rownames(seqtab.nochim)])
 # find the maximum length of all vectors in the list
 maxLength <- max(sapply(track, length))
 # use lapply to set the length of each vector to the maximum length
@@ -139,7 +139,7 @@ rownames(track) <- sample.names
 
 trimStats <- read.table(paste(wd, 'trimStats.txt', sep='/'), header = TRUE, row.names = 1)
 track <- merge(trimStats, track, by = 0, all = TRUE)
-write.table(track, file=paste(wd, 'DADA2_summary.csv', sep="/"), sep="\t", row.names = FALSE, col.names = TRUE) #save processing stats to a file
+write.table(track, file=paste(wd, 'DADA2_summary.tsv', sep="/"), sep="\t", row.names = FALSE, col.names = TRUE) #save processing stats to a file
 
 
 #Write asv sequence and count table
