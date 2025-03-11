@@ -1,7 +1,10 @@
 ﻿16S SNAPP is an analysis workflow to be run on Linux/Mac command line
-interface (CLI) for 16S multi-V region amplicon sequences from Swift's 16S SNAP
-panel. It generates taxonomic composition tables at and above genus ranks from
+interface (CLI) for 16S multi-V region amplicon sequences from IDT's xDNA 16S v2 panel. 
+It generates taxonomic composition tables at and above genus ranks from
 multiple demultiplexed fastq files.
+
+This is a fork from the original Swift Biosciences pipeline to add features and improve functionality.
+It also adds extensive documentation of the code for a better transparency of the analysis.
 
 16S SNAPP's approach is to associate sequence reads derived from multiple
 amplicon regions to their most probable sequences of origin, i.e. the assumed
@@ -12,26 +15,14 @@ classification of consensus sequences. It offers higher sensitivity for 16S
 multiple-amplicon data compared to tools designed for single 16S amplicon data.
 
 Setup:
-   1. Install and setup the following software:
-      R (https://www.r-project.org/),
-      Java ≥1.8.0_131,
-      Python 3.6.8 or later (with Numpy ≥ 1.16.0, Pandas ≥ 1.1.4, Scipy ≥1.4.1),
-      DADA2 (https://benjjneb.github.io/dada2/),
-      BLAST (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/),
-      RDPTools (github.com/rdpstaff/RDPTools),
-      Cutadapt (https://cutadapt.readthedocs.io/en/stable/),
-      VSEARCH (https://github.com/torognes/vsearch),
-      MAFFT (https://mafft.cbrc.jp/alignment/software/,
-      FASTTREE (http://www.microbesonline.org/fasttree/)
-      minimap2 2.20-r1061 (https://github.com/lh3/minimap2)
+   1. Install the conda environment included in the repository and RDP Tools (github.com/rdpstaff/RDPTools).
    3. Create a folder , e.g. 'DB', and download to it the reference and primer 
       files from (https://danaherlifesciences.box.com/s/fkojslg8t0xnksvyd6vwp2gsfdacmi5p).
    4. Clone this repository (git clone https://github.com/swiftbiosciences/16S-SNAPP-py3)
    5. Edit “config.txt” to enter absolute paths to tools, 'DB' and primer file, 
       and the expected single read length after primer is trimmed
 
-
-Command to run: snapp.sh config.txt inputdir workdir
+Command to run: snapp.sh config.txt inputdir workdir (see config_example.txt for additional options).
 
    Input: gzipped post-demultiplexing sequence fastq files each (pair)
           representing a single sample and each carrying a Swift 16S primers
@@ -45,7 +36,7 @@ Command to run: snapp.sh config.txt inputdir workdir
           templates_mafft.tree (experimental)
           OTU_count.txt (experimental)
           OTU_taxonomy.txt (experimental)
-
+          results folder with parsed files for direct input to phyloseq
 
 Limitations:
 1. The workflow largely relies on aligning reads from different gene regions
