@@ -18,7 +18,7 @@ Setup:
    1. Install the conda environment included in the repository and RDP Tools (github.com/rdpstaff/RDPTools).
    3. Create a folder , e.g. 'DB', and download to it the reference and primer 
       files from (https://danaherlifesciences.box.com/s/fkojslg8t0xnksvyd6vwp2gsfdacmi5p).
-   4. Clone this repository (git clone https://github.com/swiftbiosciences/16S-SNAPP-py3)
+   4. Clone this repository.
    5. Edit “config.txt” to enter absolute paths to tools, 'DB' and primer file, 
       and the expected single read length after primer is trimmed
 
@@ -59,3 +59,4 @@ Limitations:
 Additional notes:
    Quality trimming/filtering/denoising may be adjusted in run_dada2.R script
    as needed for specific data sets to improve the performance of the analysis.
+
